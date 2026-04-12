@@ -1,6 +1,31 @@
 # Data Model
 
-From the event storm, I identified two structures that need persistence: the `Employee` aggregate, which holds current state, and the `SalaryHistory` append-only log, which records salary changes over time to support historical insights.
+From the event storm, I identified three structures that need persistence: the `User` aggregate, which owns authentication state for each HR Manager; the `Employee` aggregate, which holds current employee state; and the `SalaryHistory` append-only log, which records salary changes over time to support historical insights.
+
+---
+
+### users
+
+| Column                   | Type        | Constraints                 |
+| ------------------------ | ----------- | --------------------------- |
+| `id`                     | `bigint`    | Primary key, auto-increment |
+| `email`                  | `varchar`   | NOT NULL, UNIQUE            |
+| `encrypted_password`     | `varchar`   | NOT NULL                    |
+| `jti`                    | `varchar`   | NOT NULL, UNIQUE            |
+| `reset_password_token`   | `varchar`   | nullable, UNIQUE            |
+| `reset_password_sent_at` | `timestamp` | nullable                    |
+| `remember_created_at`    | `timestamp` | nullable                    |
+| `sign_in_count`          | `integer`   | NOT NULL, default `0`       |
+| `current_sign_in_at`     | `timestamp` | nullable                    |
+| `last_sign_in_at`        | `timestamp` | nullable                    |
+| `current_sign_in_ip`     | `inet`      | nullable                    |
+| `last_sign_in_ip`        | `inet`      | nullable                    |
+| `created_at`             | `timestamp` | NOT NULL                    |
+| `updated_at`             | `timestamp` | NOT NULL                    |
+
+The `jti` column supports the JTIMatcher revocation strategy from `devise-jwt`. Each sign-in rotates the `jti`, invalidating any previously issued token for that user. This means sign-out is honoured — a token cannot outlive its session.
+
+The trackable columns (`sign_in_count`, `*_sign_in_at`, `*_sign_in_ip`) are included for operational visibility. For a tool managing sensitive salary data, knowing when and from where an HR Manager last accessed the system could be important to surface.
 
 ---
 
@@ -42,6 +67,17 @@ Each record is written once when a salary changes and never updated. `effective_
 
 ### Indexes
 
+**users indexes:**
+
+| Index       | Columns                | Reason                                         |
+| ----------- | ---------------------- | ---------------------------------------------- |
+| Primary key | `id`                   | Row lookup                                     |
+| Unique      | `email`                | Devise uniqueness constraint                   |
+| Unique      | `jti`                  | JTIMatcher — token lookup on every API request |
+| Unique      | `reset_password_token` | Password reset token lookup                    |
+
+**employees indexes:**
+
 | Index                             | Columns                | Reason                                                                                 |
 | --------------------------------- | ---------------------- | -------------------------------------------------------------------------------------- |
 | Primary key                       | `id`                   | Row lookup                                                                             |
@@ -64,6 +100,8 @@ Each record is written once when a salary changes and never updated. `effective_
 ---
 
 ### Notes
+
+The `jti` column on `users` is indexed with a unique constraint because JTIMatcher validates it on every authenticated API request — without an index, that's a full table scan per request.
 
 I store `first_name` and `last_name` separately rather than as a single `full_name`. The seed script generates names by combining values from `first_names.txt` and `last_names.txt`, so keeping them split avoids string manipulation at seed time and makes sorting by last name natural.
 
