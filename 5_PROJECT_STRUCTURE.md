@@ -20,14 +20,23 @@ incubyte-salary-management/
 ├── app/
 │   ├── controllers/
 │   │   ├── application_controller.rb
-│   │   ├── employees_controller.rb       ← Hotwire (HTML responses)
-│   │   ├── insights_controller.rb        ← Hotwire (HTML responses)
+│   │   ├── employees_controller.rb          ← Hotwire (HTML responses)
+│   │   ├── insights_controller.rb           ← Hotwire (HTML responses)
+│   │   ├── users/
+│   │   │   ├── sessions_controller.rb       ← Devise override (Hotwire sign in/out)
+│   │   │   ├── registrations_controller.rb  ← Devise override (Hotwire sign up)
+│   │   │   └── passwords_controller.rb      ← Devise override (Hotwire password reset)
 │   │   └── api/
 │   │       └── v1/
+│   │           ├── base_controller.rb       ← authenticate_user!, JWT strategy
 │   │           ├── employees_controller.rb
+│   │           ├── auth/
+│   │           │   ├── sessions_controller.rb      ← sign in → returns JWT
+│   │           │   └── registrations_controller.rb ← sign up via API
 │   │           └── insights/
 │   │               └── salary_controller.rb
 │   ├── models/
+│   │   ├── user.rb
 │   │   ├── employee.rb
 │   │   └── salary_history.rb
 │   ├── serializers/
@@ -42,6 +51,15 @@ incubyte-salary-management/
 │   │       ├── salary_insights_service.rb
 │   │       └── historical_salary_service.rb
 │   └── views/
+│       ├── devise/
+│       │   ├── sessions/
+│       │   │   └── new.html.erb             ← Sign in form
+│       │   ├── registrations/
+│       │   │   ├── new.html.erb             ← Sign up form
+│       │   │   └── edit.html.erb            ← Edit account form
+│       │   └── passwords/
+│       │       ├── new.html.erb             ← Forgot password form
+│       │       └── edit.html.erb            ← Reset password form
 │       ├── employees/
 │       │   ├── index.html.erb
 │       │   ├── show.html.erb
@@ -57,11 +75,15 @@ incubyte-salary-management/
 │       └── last_names.txt
 ├── test/
 │   ├── models/
+│   │   ├── user_test.rb
 │   │   ├── employee_test.rb
 │   │   └── salary_history_test.rb
 │   ├── integration/
 │   │   └── api/
 │   │       └── v1/
+│   │           ├── auth/
+│   │           │   ├── sessions_test.rb
+│   │           │   └── registrations_test.rb
 │   │           ├── employees_test.rb
 │   │           └── insights/
 │   │               └── salary_test.rb
@@ -74,6 +96,7 @@ incubyte-salary-management/
 │   ├── serializers/
 │   │   └── employee_serializer_test.rb
 │   └── fixtures/
+│       ├── users.yml
 │       ├── employees.yml
 │       └── salary_histories.yml
 └── config/
@@ -89,6 +112,57 @@ I test API endpoints via `test/integration/` rather than `test/controllers/`. In
 I'm using Rails fixtures (YAML) for test data rather than FactoryBot. Fixtures are the Rails default, fast, and deterministic — no additional dependency needed.
 
 I keep the seed script and source name files together in `db/seeds/` rather than inlining everything into `db/seeds.rb`, keeping the seeds directory self-contained.
+
+---
+
+### Controller hierarchy
+
+```
+ApplicationController
+├── Users::SessionsController       (Devise, Hotwire)
+├── Users::RegistrationsController  (Devise, Hotwire)
+├── Users::PasswordsController      (Devise, Hotwire)
+├── EmployeesController             (Hotwire)
+├── InsightsController              (Hotwire)
+└── Api::V1::BaseController         (before_action :authenticate_user!, JWT)
+    ├── Api::V1::Auth::SessionsController
+    ├── Api::V1::Auth::RegistrationsController
+    ├── Api::V1::EmployeesController
+    └── Api::V1::Insights::SalaryController
+```
+
+`Api::V1::BaseController` is the authentication boundary for the JSON API. Every controller that inherits from it requires a valid JWT. The Devise Hotwire controllers sit outside this hierarchy — they use Devise's own session strategy and are the entry point before a token exists.
+
+---
+
+### Routes shape
+
+```ruby
+devise_for :users, controllers: {
+  sessions:      'users/sessions',
+  registrations: 'users/registrations',
+  passwords:     'users/passwords'
+}
+
+namespace :api do
+  namespace :v1 do
+    devise_for :users, controllers: {
+      sessions:      'api/v1/auth/sessions',
+      registrations: 'api/v1/auth/registrations'
+    }
+
+    resources :employees do
+      member { patch :salary }
+    end
+
+    namespace :insights do
+      resource :salary, only: [:show] do
+        get :history, on: :collection
+      end
+    end
+  end
+end
+```
 
 ---
 
