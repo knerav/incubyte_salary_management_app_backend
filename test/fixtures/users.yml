@@ -1,0 +1,13 @@
+hr_manager:
+  email: hr@incubyte.co
+  encrypted_password: <%= BCrypt::Password.create("Password1!", cost: 1) %>
+  sign_in_count: 3
+  current_sign_in_at: <%= 1.hour.ago %>
+  last_sign_in_at: <%= 1.day.ago %>
+  current_sign_in_ip: 127.0.0.1
+  last_sign_in_ip: 127.0.0.1
+
+hr_manager_two:
+  email: hr2@incubyte.co
+  encrypted_password: <%= BCrypt::Password.create("Password1!", cost: 1) %>
+  sign_in_count: 0
