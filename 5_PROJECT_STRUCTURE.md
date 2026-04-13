@@ -19,13 +19,10 @@ incubyte-salary-management-ui/    ← Next.js frontend
 incubyte-salary-management/
 ├── app/
 │   ├── controllers/
-│   │   ├── application_controller.rb
-│   │   ├── employees_controller.rb          ← Hotwire (HTML responses)
-│   │   ├── insights_controller.rb           ← Hotwire (HTML responses)
-│   │   ├── users/
-│   │   │   ├── sessions_controller.rb       ← Devise override (Hotwire sign in/out)
-│   │   │   ├── registrations_controller.rb  ← Devise override (Hotwire sign up)
-│   │   │   └── passwords_controller.rb      ← Devise override (Hotwire password reset)
+│   │   ├── application_controller.rb    ← authenticate_user!, after_sign_out_path_for
+│   │   ├── pages_controller.rb          ← Hotwire (home / future dashboard)
+│   │   ├── employees_controller.rb      ← Hotwire (HTML responses)
+│   │   ├── insights_controller.rb       ← Hotwire (HTML responses)
 │   │   └── api/
 │   │       └── v1/
 │   │           ├── base_controller.rb       ← authenticate_user!, JWT strategy
@@ -51,15 +48,23 @@ incubyte-salary-management/
 │   │       ├── salary_insights_service.rb
 │   │       └── historical_salary_service.rb
 │   └── views/
+│       ├── layouts/
+│       │   ├── application.html.erb     ← Main app layout (authenticated pages)
+│       │   └── devise.html.erb          ← Auth layout (sign in, sign up, password reset)
 │       ├── devise/
 │       │   ├── sessions/
 │       │   │   └── new.html.erb             ← Sign in form
 │       │   ├── registrations/
 │       │   │   ├── new.html.erb             ← Sign up form
 │       │   │   └── edit.html.erb            ← Edit account form
-│       │   └── passwords/
-│       │       ├── new.html.erb             ← Forgot password form
-│       │       └── edit.html.erb            ← Reset password form
+│       │   ├── passwords/
+│       │   │   ├── new.html.erb             ← Forgot password form
+│       │   │   └── edit.html.erb            ← Reset password form
+│       │   └── shared/
+│       │       ├── _error_messages.html.erb
+│       │       └── _links.html.erb
+│       ├── pages/
+│       │   └── home.html.erb            ← Homepage / future dashboard
 │       ├── employees/
 │       │   ├── index.html.erb
 │       │   ├── show.html.erb
@@ -69,6 +74,7 @@ incubyte-salary-management/
 │           └── index.html.erb
 ├── db/
 │   ├── migrate/
+│   ├── schema.rb
 │   └── seeds/
 │       ├── seed.rb
 │       ├── first_names.txt
@@ -79,11 +85,14 @@ incubyte-salary-management/
 │   │   ├── employee_test.rb
 │   │   └── salary_history_test.rb
 │   ├── integration/
+│   │   ├── pages_test.rb                ← Homepage auth guard + render
+│   │   ├── employees_test.rb            ← Employees auth guard + render
+│   │   ├── insights_test.rb             ← Insights auth guard + render
+│   │   ├── users/
+│   │   │   ├── sessions_test.rb         ← Sign in / sign out flows
+│   │   │   └── registrations_test.rb    ← Sign up flow
 │   │   └── api/
 │   │       └── v1/
-│   │           ├── auth/
-│   │           │   ├── sessions_test.rb
-│   │           │   └── registrations_test.rb
 │   │           ├── employees_test.rb
 │   │           └── insights/
 │   │               └── salary_test.rb
@@ -95,6 +104,7 @@ incubyte-salary-management/
 │   │       └── historical_salary_service_test.rb
 │   ├── serializers/
 │   │   └── employee_serializer_test.rb
+│   ├── system/                          ← Placeholder; no system tests at this stage
 │   └── fixtures/
 │       ├── users.yml
 │       ├── employees.yml
@@ -107,7 +117,9 @@ I put complex business logic — insights aggregations and employee filtering �
 
 I handle JSON rendering with PORO serializer classes in `app/serializers/` rather than inline `render json:` calls in controllers. This makes the response shape explicit and testable without coupling it to the controller.
 
-I test API endpoints via `test/integration/` rather than `test/controllers/`. Integration tests exercise the full stack through the router, which is closer to how the API is actually consumed. Controller tests miss routing and middleware concerns.
+I test API endpoints via `test/integration/api/` rather than `test/controllers/`. Integration tests exercise the full stack through the router, which is closer to how the API is actually consumed. Controller tests miss routing and middleware concerns.
+
+Hotwire views follow the same pattern — integration tests in `test/integration/` cover the auth guard and the happy-path render for each page. The underlying business logic is covered by service tests, not re-tested at the view layer.
 
 I'm using Rails fixtures (YAML) for test data rather than FactoryBot. Fixtures are the Rails default, fast, and deterministic — no additional dependency needed.
 
@@ -118,31 +130,35 @@ I keep the seed script and source name files together in `db/seeds/` rather than
 ### Controller hierarchy
 
 ```
-ApplicationController
-├── Users::SessionsController       (Devise, Hotwire)
-├── Users::RegistrationsController  (Devise, Hotwire)
-├── Users::PasswordsController      (Devise, Hotwire)
-├── EmployeesController             (Hotwire)
-├── InsightsController              (Hotwire)
-└── Api::V1::BaseController         (before_action :authenticate_user!, JWT)
+ApplicationController           (authenticate_user!, after_sign_out_path_for)
+├── PagesController             (Hotwire — home / future dashboard)
+├── EmployeesController         (Hotwire)
+├── InsightsController          (Hotwire)
+└── Api::V1::BaseController     (JWT strategy)
     ├── Api::V1::Auth::SessionsController
     ├── Api::V1::Auth::RegistrationsController
     ├── Api::V1::EmployeesController
     └── Api::V1::Insights::SalaryController
 ```
 
-`Api::V1::BaseController` is the authentication boundary for the JSON API. Every controller that inherits from it requires a valid JWT. The Devise Hotwire controllers sit outside this hierarchy — they use Devise's own session strategy and are the entry point before a token exists.
+`authenticate_user!` lives in `ApplicationController` and protects all Hotwire pages. Devise controllers are exempted automatically. `Api::V1::BaseController` inherits the same guard but applies it via the JWT strategy for the JSON API.
+
+The Devise `users/sessions`, `users/registrations`, and `users/passwords` controller overrides were originally planned to handle Turbo form responses. Devise 5.0 resolved this natively via the `responders` gem — those overrides are no longer needed and have been omitted.
 
 ---
 
 ### Routes shape
 
 ```ruby
-devise_for :users, controllers: {
-  sessions:      'users/sessions',
-  registrations: 'users/registrations',
-  passwords:     'users/passwords'
-}
+devise_for :users
+
+root "pages#home"
+
+resources :employees do
+  member { patch :salary }
+end
+
+get "insights", to: "insights#index"
 
 namespace :api do
   namespace :v1 do
