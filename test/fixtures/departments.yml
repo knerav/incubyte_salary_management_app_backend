@@ -1,0 +1,14 @@
+engineering:
+  name: Engineering
+
+product:
+  name: Product
+
+design:
+  name: Design
+
+hr:
+  name: HR
+
+qa:
+  name: QA
