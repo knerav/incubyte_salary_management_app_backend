@@ -11,6 +11,8 @@ Rails.application.routes.draw do
 
   devise_for :users
 
+  resources :job_titles
+
   resources :employees do
     member { patch :salary }
   end
