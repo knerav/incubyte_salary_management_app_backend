@@ -24,8 +24,8 @@ GET /api/v1/employees
 | `per_page`        | integer | Records per page, default `25` |
 | `q`               | string  | Search by name                 |
 | `country`         | string  | Filter by country              |
-| `department`      | string  | Filter by department           |
-| `job_title`       | string  | Filter by job title            |
+| `department_id`   | integer | Filter by department           |
+| `job_title_id`    | integer | Filter by job title            |
 | `employment_type` | string  | Filter by employment type      |
 
 **Response `200`:**
@@ -194,9 +194,9 @@ I require at least one filter parameter — returning aggregates over all 10,000
 
 | Parameter    | Type   | Description          |
 | ------------ | ------ | -------------------- |
-| `country`    | string | Filter by country    |
-| `department` | string | Filter by department |
-| `job_title`  | string | Filter by job title  |
+| `country`       | string  | Filter by country    |
+| `department_id` | integer | Filter by department |
+| `job_title_id`  | integer | Filter by job title  |
 
 Filters are additive — multiple parameters narrow the result set.
 
@@ -237,12 +237,12 @@ This endpoint is backed by `salary_histories` and supports the same filter dimen
 
 | Parameter    | Type   | Description                                           |
 | ------------ | ------ | ----------------------------------------------------- |
-| `country`    | string | Filter by country                                     |
-| `department` | string | Filter by department                                  |
-| `job_title`  | string | Filter by job title                                   |
-| `from`       | date   | Start of date range, default 12 months ago            |
-| `to`         | date   | End of date range, default today                      |
-| `group_by`   | string | Grouping period: `month` (default), `quarter`, `year` |
+| `country`       | string  | Filter by country                                     |
+| `department_id` | integer | Filter by department                                  |
+| `job_title_id`  | integer | Filter by job title                                   |
+| `from`          | date    | Start of date range, default 12 months ago            |
+| `to`            | date    | End of date range, default today                      |
+| `group_by`      | string  | Grouping period: `month` (default), `quarter`, `year` |
 
 **Response `200`:**
 

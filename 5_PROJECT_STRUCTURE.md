@@ -22,6 +22,7 @@ incubyte-salary-management/
 │   │   ├── application_controller.rb    ← authenticate_user!, after_sign_out_path_for
 │   │   ├── pages_controller.rb          ← Hotwire (home)
 │   │   ├── job_titles_controller.rb     ← Hotwire (full CRUD)
+│   │   ├── departments_controller.rb    ← Hotwire (full CRUD)
 │   │   ├── employees_controller.rb      ← Hotwire (full CRUD + salary action)
 │   │   ├── insights_controller.rb       ← Hotwire (filter + aggregations)
 │   │   └── api/                         ← [not yet implemented]
@@ -36,6 +37,7 @@ incubyte-salary-management/
 │   ├── models/
 │   │   ├── user.rb                      ← Devise, JTIMatcher, trackable
 │   │   ├── job_title.rb                 ← presence/uniqueness validations, deletion guard
+│   │   ├── department.rb                ← presence/uniqueness validations, deletion guard
 │   │   ├── employee.rb                  ← validations, soft delete scope, full_name,
 │   │   │                                   salary history callback
 │   │   └── salary_history.rb            ← validations, before_update immutability guard
@@ -56,7 +58,7 @@ incubyte-salary-management/
 │       │   └── devise.html.erb          ← Auth layout (sign in, sign up, password reset)
 │       ├── shared/
 │       │   └── _navbar.html.erb         ← Logo, nav links (Home, Employees, Job Titles,
-│       │                                   Insights), sign out button
+│       │                                   Departments, Insights), sign out button
 │       ├── devise/
 │       │   ├── sessions/
 │       │   │   └── new.html.erb
@@ -76,6 +78,11 @@ incubyte-salary-management/
 │       │   ├── new.html.erb
 │       │   ├── edit.html.erb
 │       │   └── _form.html.erb
+│       ├── departments/
+│       │   ├── index.html.erb
+│       │   ├── new.html.erb
+│       │   ├── edit.html.erb
+│       │   └── _form.html.erb
 │       ├── employees/
 │       │   ├── index.html.erb
 │       │   ├── show.html.erb            ← profile + inline salary update form
@@ -89,18 +96,22 @@ incubyte-salary-management/
 │   │   ├── 20260412163853_devise_create_users.rb
 │   │   ├── 20260413073224_create_job_titles.rb
 │   │   ├── 20260413075258_create_employees.rb
-│   │   └── 20260413104507_create_salary_histories.rb
+│   │   ├── 20260413104507_create_salary_histories.rb
+│   │   ├── 20260413164738_create_departments.rb
+│   │   └── 20260413164739_add_department_to_employees.rb
 │   ├── schema.rb
 │   └── seeds.rb                         ← seeds default HR Manager user
 ├── test/
 │   ├── models/
 │   │   ├── user_test.rb
 │   │   ├── job_title_test.rb
+│   │   ├── department_test.rb
 │   │   ├── employee_test.rb
 │   │   └── salary_history_test.rb
 │   ├── integration/
 │   │   ├── pages_test.rb
 │   │   ├── job_titles_test.rb
+│   │   ├── departments_test.rb
 │   │   ├── employees_test.rb
 │   │   ├── insights_test.rb
 │   │   ├── user_sessions_test.rb
@@ -122,6 +133,7 @@ incubyte-salary-management/
 │   └── fixtures/
 │       ├── users.yml
 │       ├── job_titles.yml
+│       ├── departments.yml
 │       ├── employees.yml                ← john_doe, jane_smith, deleted_employee
 │       └── salary_histories.yml         ← two entries for john_doe, one for jane_smith
 └── config/
@@ -136,6 +148,7 @@ incubyte-salary-management/
 ApplicationController                 (authenticate_user!, after_sign_out_path_for)
 ├── PagesController                   (Hotwire — home)
 ├── JobTitlesController               (Hotwire — full CRUD)
+├── DepartmentsController             (Hotwire — full CRUD)
 ├── EmployeesController               (Hotwire — full CRUD + salary action)
 ├── InsightsController                (Hotwire — filter + SQL aggregations)
 └── Api::V1::BaseController           (JWT strategy) [not yet implemented]
@@ -159,6 +172,7 @@ devise_for :users
 root "pages#home"
 
 resources :job_titles
+resources :departments
 
 resources :employees do
   member { patch :salary }
