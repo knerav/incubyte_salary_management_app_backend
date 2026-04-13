@@ -3,7 +3,7 @@ john_doe:
   last_name: Doe
   email: john.doe@company.com
   job_title: software_engineer
-  department: Engineering
+  department: engineering
   country: US
   salary: 95000.00
   currency: USD
@@ -15,7 +15,7 @@ jane_smith:
   last_name: Smith
   email: jane.smith@company.com
   job_title: product_manager
-  department: Product
+  department: product
   country: IN
   salary: 75000.00
   currency: INR
@@ -27,7 +27,7 @@ deleted_employee:
   last_name: Brown
   email: alice.brown@company.com
   job_title: designer
-  department: Design
+  department: design
   country: GB
   salary: 80000.00
   currency: GBP

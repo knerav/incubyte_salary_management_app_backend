@@ -10,16 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_13_104507) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_13_164739) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "departments", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_departments_on_name", unique: true
+  end
 
   create_table "employees", force: :cascade do |t|
     t.string "country", limit: 2, null: false
     t.datetime "created_at", null: false
     t.string "currency", default: "USD", null: false
     t.datetime "deleted_at"
-    t.string "department", null: false
+    t.bigint "department_id", null: false
     t.string "email", null: false
     t.string "employment_type", null: false
     t.string "first_name", null: false
@@ -31,7 +38,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_13_104507) do
     t.index ["country", "job_title_id"], name: "idx_employees_country_job_title"
     t.index ["country"], name: "idx_employees_country"
     t.index ["deleted_at"], name: "idx_employees_deleted_at"
-    t.index ["department"], name: "idx_employees_department"
+    t.index ["department_id"], name: "idx_employees_department_id"
+    t.index ["department_id"], name: "index_employees_on_department_id"
     t.index ["email"], name: "index_employees_on_email", unique: true
     t.index ["job_title_id"], name: "index_employees_on_job_title_id"
   end
@@ -74,6 +82,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_13_104507) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "employees", "departments"
   add_foreign_key "employees", "job_titles"
   add_foreign_key "salary_histories", "employees"
 end

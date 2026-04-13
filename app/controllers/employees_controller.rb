@@ -2,7 +2,7 @@ class EmployeesController < ApplicationController
   before_action :set_employee, only: %i[show edit update salary destroy]
 
   def index
-    @employees = Employee.includes(:job_title).order(:last_name, :first_name)
+    @employees = Employee.includes(:job_title, :department).order(:last_name, :first_name)
   end
 
   def show; end
@@ -54,8 +54,8 @@ class EmployeesController < ApplicationController
 
   def employee_params
     params.require(:employee).permit(
-      :first_name, :last_name, :email, :job_title_id,
-      :department, :country, :salary, :currency, :employment_type, :hired_on
+      :first_name, :last_name, :email, :job_title_id, :department_id,
+      :country, :salary, :currency, :employment_type, :hired_on
     )
   end
 

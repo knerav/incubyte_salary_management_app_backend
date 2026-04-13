@@ -20,7 +20,7 @@
               <%= link_to employee.full_name, employee_path(employee),
                     class: "hover:text-indigo-600" %>
             </p>
-            <p class="text-xs text-gray-500"><%= employee.job_title.name %> · <%= employee.department %></p>
+            <p class="text-xs text-gray-500"><%= employee.job_title.name %> · <%= employee.department.name %></p>
           </div>
           <div class="flex items-center gap-3">
             <%= link_to "Edit", edit_employee_path(employee),

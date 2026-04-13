@@ -9,7 +9,7 @@ class EmployeeTest < ActiveSupport::TestCase
       last_name: "Jones",
       email: "bob.jones@company.com",
       job_title: job_titles(:senior_software_engineer),
-      department: "Engineering",
+      department: departments(:engineering),
       country: "US",
       salary: 110000.00,
       currency: "USD",
@@ -39,10 +39,8 @@ class EmployeeTest < ActiveSupport::TestCase
     assert_includes employee.errors[:email], "can't be blank"
   end
 
-  test "is invalid without a department" do
-    employee = employees(:john_doe).tap { |e| e.department = "" }
-    assert_not employee.valid?
-    assert_includes employee.errors[:department], "can't be blank"
+  test "belongs to a department" do
+    assert_equal departments(:engineering), employees(:john_doe).department
   end
 
   test "is invalid without a country" do
@@ -157,7 +155,7 @@ class EmployeeTest < ActiveSupport::TestCase
     employee = employees(:john_doe)
 
     assert_no_difference "SalaryHistory.where(employee: employee).count" do
-      employee.update!(department: "Platform Engineering")
+      employee.update!(country: "CA")
     end
   end
 end

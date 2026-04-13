@@ -2,6 +2,7 @@ class Employee < ApplicationRecord
   EMPLOYMENT_TYPES = %w[full_time part_time contract].freeze
 
   belongs_to :job_title
+  belongs_to :department
   has_many :salary_histories
 
   default_scope { where(deleted_at: nil) }
@@ -9,7 +10,6 @@ class Employee < ApplicationRecord
   validates :first_name,       presence: true
   validates :last_name,        presence: true
   validates :email,            presence: true, uniqueness: true
-  validates :department,       presence: true
   validates :country,          presence: true
   validates :salary,           presence: true, numericality: { greater_than: 0 }
   validates :currency,         presence: true

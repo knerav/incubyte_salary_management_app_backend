@@ -24,7 +24,7 @@ class InsightsTest < ActionDispatch::IntegrationTest
 
   test "renders with a department filter" do
     sign_in_as users(:hr_manager)
-    get insights_url, params: { department: "Engineering" }
+    get insights_url, params: { department_id: departments(:engineering).id }
     assert_response :ok
   end
 
@@ -36,7 +36,7 @@ class InsightsTest < ActionDispatch::IntegrationTest
 
   test "renders with multiple filters combined" do
     sign_in_as users(:hr_manager)
-    get insights_url, params: { country: "US", department: "Engineering" }
+    get insights_url, params: { country: "US", department_id: departments(:engineering).id }
     assert_response :ok
   end
 

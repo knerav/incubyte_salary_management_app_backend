@@ -48,7 +48,7 @@ class EmployeesTest < ActionDispatch::IntegrationTest
           last_name: "Jones",
           email: "bob.jones@company.com",
           job_title_id: job_titles(:senior_software_engineer).id,
-          department: "Engineering",
+          department_id: departments(:engineering).id,
           country: "US",
           salary: "110000.00",
           currency: "USD",
@@ -85,7 +85,7 @@ class EmployeesTest < ActionDispatch::IntegrationTest
           last_name: "User",
           email: employees(:john_doe).email,
           job_title_id: job_titles(:software_engineer).id,
-          department: "Engineering",
+          department_id: departments(:engineering).id,
           country: "US",
           salary: "80000.00",
           currency: "USD",
@@ -110,13 +110,13 @@ class EmployeesTest < ActionDispatch::IntegrationTest
     sign_in_as users(:hr_manager)
 
     patch employee_url(employees(:john_doe)), params: {
-      employee: { department: "Platform Engineering" }
+      employee: { department_id: departments(:product).id }
     }
 
     assert_response :redirect
     follow_redirect!
     assert_response :ok
-    assert_equal "Platform Engineering", employees(:john_doe).reload.department
+    assert_equal departments(:product), employees(:john_doe).reload.department
   end
 
   test "re-renders the edit form with 422 when required fields are blank" do

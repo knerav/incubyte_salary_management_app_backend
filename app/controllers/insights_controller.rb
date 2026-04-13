@@ -4,7 +4,7 @@ class InsightsController < ApplicationController
 
     scope = Employee.all
     scope = scope.where(country: @filters[:country])           if @filters[:country].present?
-    scope = scope.where(department: @filters[:department])     if @filters[:department].present?
+    scope = scope.where(department_id: @filters[:department_id]) if @filters[:department_id].present?
     scope = scope.where(job_title_id: @filters[:job_title_id]) if @filters[:job_title_id].present?
 
     @stats = scope.pick(
@@ -30,6 +30,6 @@ class InsightsController < ApplicationController
   private
 
   def filter_params
-    params.permit(:country, :department, :job_title_id)
+    params.permit(:country, :department_id, :job_title_id)
   end
 end
