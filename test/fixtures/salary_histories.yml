@@ -1,0 +1,17 @@
+john_doe_initial:
+  employee: john_doe
+  salary: 85000.00
+  currency: USD
+  effective_from: 2022-03-14
+
+john_doe_raise:
+  employee: john_doe
+  salary: 95000.00
+  currency: USD
+  effective_from: 2023-01-01
+
+jane_smith_initial:
+  employee: jane_smith
+  salary: 75000.00
+  currency: INR
+  effective_from: 2021-06-01
