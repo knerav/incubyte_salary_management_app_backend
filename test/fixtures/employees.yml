@@ -1,0 +1,13 @@
+# Minimal fixture to support the JobTitle deletion guard tests.
+# Full employee fixtures will be added when the Employee domain is implemented.
+john_doe:
+  first_name: John
+  last_name: Doe
+  email: john.doe@company.com
+  job_title: software_engineer
+  department: Engineering
+  country: US
+  salary: 95000.00
+  currency: USD
+  employment_type: full_time
+  hired_on: 2022-03-14

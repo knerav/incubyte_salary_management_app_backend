@@ -35,6 +35,7 @@ class JobTitlesController < ApplicationController
     if @job_title.destroyed?
       redirect_to job_titles_path, notice: "Job title was successfully deleted."
     else
+      @job_titles = JobTitle.order(:name)
       render :index, status: :unprocessable_content
     end
   end
