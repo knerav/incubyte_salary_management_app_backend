@@ -1,0 +1,41 @@
+<div class="max-w-3xl mx-auto px-4 py-10">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">Departments</h1>
+    <%= link_to "Add Department", new_department_path,
+          class: "rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors" %>
+  </div>
+
+  <% if notice.present? %>
+    <div class="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+      <%= notice %>
+    </div>
+  <% end %>
+
+  <% if alert.present? %>
+    <div class="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+      <%= alert %>
+    </div>
+  <% end %>
+
+  <div class="bg-white shadow-sm rounded-xl border border-gray-200 divide-y divide-gray-100">
+    <% if @departments.any? %>
+      <% @departments.each do |department| %>
+        <div class="flex items-center justify-between px-6 py-4">
+          <span class="text-sm text-gray-900"><%= department.name %></span>
+          <div class="flex items-center gap-3">
+            <%= link_to "Edit", edit_department_path(department),
+                  class: "text-sm text-indigo-600 hover:text-indigo-500 font-medium" %>
+            <%= button_to "Delete", department_path(department),
+                  method: :delete,
+                  class: "text-sm text-red-600 hover:text-red-500 font-medium bg-transparent border-0 cursor-pointer p-0",
+                  data: { turbo_confirm: "Delete '#{department.name}'? This cannot be undone." } %>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="px-6 py-8 text-center text-sm text-gray-500">
+        No departments yet. <%= link_to "Add one", new_department_path, class: "text-indigo-600 hover:text-indigo-500 font-medium" %>.
+      </div>
+    <% end %>
+  </div>
+</div>
