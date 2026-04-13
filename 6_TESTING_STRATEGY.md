@@ -2,7 +2,7 @@
 
 The assignment asks for tests that are fast, deterministic, and easy to understand. Those three constraints directly informed every choice I made here.
 
-I'm following a strict TDD cycle — red, green, refactor — throughout the Rails codebase. I chose an inside-out approach: model tests first, then services, then integration tests for the API layer. Outside-in TDD (starting from integration tests and working inward) makes more sense when requirements are still being discovered. Here, the requirements were already thoroughly worked through during event storming and captured in the data model and API contract, so inside-in lets me move faster with tighter, more focused test cycles.
+I'm following a strict TDD cycle — red, green, refactor — throughout the Rails codebase. I chose an inside-out approach: model tests first, then integration tests for the Hotwire layer, then services and serializers for the JSON API layer. Outside-in TDD (starting from integration tests and working inward) makes more sense when requirements are still being discovered. Here, the requirements were already thoroughly worked through during event storming and captured in the data model and API contract, so inside-out lets me move faster with tighter, more focused test cycles.
 
 Even infrastructure concerns like migrations follow the TDD cycle. Rather than writing migrations speculatively upfront, each migration is driven by a failing test — the test failure is the red state that makes the migration necessary.
 
@@ -22,9 +22,11 @@ I start here. Model tests cover validations, associations, and scopes — anythi
 
 I pay particular attention to the soft delete default scope. If it regresses, deleted employees silently reappear in every query and every insight calculation. A dedicated test that verifies deleted records are excluded by default is essential.
 
-### 2. Controllers — `test/controllers/`
+### 2. Integration tests (Hotwire) — `test/integration/`
 
-With the models in place, I move to controllers for the standard CRUD actions. Testing controllers at this stage naturally drives the emergence of Hotwire views — each controller action that needs to render a response pushes the view into existence. The views start basic and get refined later.
+With the models in place, I move directly to integration tests for each resource's CRUD actions rather than isolated controller tests. Integration tests exercise the full stack through the router — routing, authentication guards, parameter handling, response codes, and redirects — which is closer to how the Hotwire frontend actually exercises the application. Controller tests in isolation would miss these concerns without adding meaningful coverage.
+
+Each integration test suite is written before the controller and views exist, providing the red state that drives their implementation.
 
 ### 3. Services — `test/services/`
 

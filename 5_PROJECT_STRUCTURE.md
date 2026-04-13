@@ -21,27 +21,29 @@ incubyte-salary-management/
 │   ├── controllers/
 │   │   ├── application_controller.rb    ← authenticate_user!, after_sign_out_path_for
 │   │   ├── pages_controller.rb          ← Hotwire (home / future dashboard)
-│   │   ├── employees_controller.rb      ← Hotwire (HTML responses)
-│   │   ├── insights_controller.rb       ← Hotwire (HTML responses)
-│   │   └── api/
+│   │   ├── job_titles_controller.rb     ← Hotwire (full CRUD)
+│   │   ├── employees_controller.rb      ← Hotwire (stub — full CRUD pending)
+│   │   ├── insights_controller.rb       ← Hotwire (stub — pending)
+│   │   └── api/                         ← [not yet implemented]
 │   │       └── v1/
-│   │           ├── base_controller.rb       ← authenticate_user!, JWT strategy
+│   │           ├── base_controller.rb
 │   │           ├── employees_controller.rb
 │   │           ├── auth/
-│   │           │   ├── sessions_controller.rb      ← sign in → returns JWT
-│   │           │   └── registrations_controller.rb ← sign up via API
+│   │           │   ├── sessions_controller.rb
+│   │           │   └── registrations_controller.rb
 │   │           └── insights/
 │   │               └── salary_controller.rb
 │   ├── models/
 │   │   ├── user.rb
-│   │   ├── employee.rb
-│   │   └── salary_history.rb
-│   ├── serializers/
+│   │   ├── job_title.rb                 ← validates name presence/uniqueness, deletion guard
+│   │   ├── employee.rb                  ← stub (belongs_to :job_title — full model pending)
+│   │   └── salary_history.rb            ← [not yet implemented]
+│   ├── serializers/                     ← [not yet implemented]
 │   │   ├── employee_serializer.rb
 │   │   └── insights/
 │   │       ├── salary_insights_serializer.rb
 │   │       └── historical_salary_serializer.rb
-│   ├── services/
+│   ├── services/                        ← [not yet implemented]
 │   │   ├── employees/
 │   │   │   └── filter_service.rb
 │   │   └── insights/
@@ -51,97 +53,89 @@ incubyte-salary-management/
 │       ├── layouts/
 │       │   ├── application.html.erb     ← Main app layout (authenticated pages)
 │       │   └── devise.html.erb          ← Auth layout (sign in, sign up, password reset)
+│       ├── shared/
+│       │   └── _navbar.html.erb         ← Logo, nav links, sign out button
 │       ├── devise/
 │       │   ├── sessions/
-│       │   │   └── new.html.erb             ← Sign in form
+│       │   │   └── new.html.erb
 │       │   ├── registrations/
-│       │   │   ├── new.html.erb             ← Sign up form
-│       │   │   └── edit.html.erb            ← Edit account form
+│       │   │   ├── new.html.erb
+│       │   │   └── edit.html.erb
 │       │   ├── passwords/
-│       │   │   ├── new.html.erb             ← Forgot password form
-│       │   │   └── edit.html.erb            ← Reset password form
+│       │   │   ├── new.html.erb
+│       │   │   └── edit.html.erb
 │       │   └── shared/
 │       │       ├── _error_messages.html.erb
 │       │       └── _links.html.erb
 │       ├── pages/
-│       │   └── home.html.erb            ← Homepage / future dashboard
-│       ├── employees/
+│       │   └── home.html.erb
+│       ├── job_titles/
 │       │   ├── index.html.erb
-│       │   ├── show.html.erb
 │       │   ├── new.html.erb
-│       │   └── edit.html.erb
-│       └── insights/
+│       │   ├── edit.html.erb
+│       │   └── _form.html.erb
+│       ├── employees/                   ← [stub views — full implementation pending]
+│       │   └── index.html.erb
+│       └── insights/                    ← [stub — pending]
 │           └── index.html.erb
 ├── db/
 │   ├── migrate/
+│   │   ├── 20260412163853_devise_create_users.rb
+│   │   ├── 20260413073224_create_job_titles.rb
+│   │   └── 20260413075258_create_employees.rb  ← stub migration; full model pending
 │   ├── schema.rb
-│   └── seeds/
-│       ├── seed.rb
-│       ├── first_names.txt
-│       └── last_names.txt
+│   └── seeds.rb                         ← seeds default HR Manager user
 ├── test/
 │   ├── models/
 │   │   ├── user_test.rb
-│   │   ├── employee_test.rb
-│   │   └── salary_history_test.rb
+│   │   └── job_title_test.rb
 │   ├── integration/
-│   │   ├── pages_test.rb                ← Homepage auth guard + render
-│   │   ├── employees_test.rb            ← Employees auth guard + render
-│   │   ├── insights_test.rb             ← Insights auth guard + render
-│   │   ├── users/
-│   │   │   ├── sessions_test.rb         ← Sign in / sign out flows
-│   │   │   └── registrations_test.rb    ← Sign up flow
-│   │   └── api/
+│   │   ├── pages_test.rb
+│   │   ├── employees_test.rb            ← [written — pending green; employee model not yet complete]
+│   │   ├── insights_test.rb
+│   │   ├── job_titles_test.rb
+│   │   ├── user_sessions_test.rb
+│   │   ├── user_registrations_test.rb
+│   │   └── api/                         ← [not yet implemented]
 │   │       └── v1/
 │   │           ├── employees_test.rb
 │   │           └── insights/
 │   │               └── salary_test.rb
-│   ├── services/
+│   ├── services/                        ← [not yet implemented]
 │   │   ├── employees/
 │   │   │   └── filter_service_test.rb
 │   │   └── insights/
 │   │       ├── salary_insights_service_test.rb
 │   │       └── historical_salary_service_test.rb
-│   ├── serializers/
+│   ├── serializers/                     ← [not yet implemented]
 │   │   └── employee_serializer_test.rb
-│   ├── system/                          ← Placeholder; no system tests at this stage
+│   ├── system/                          ← placeholder; no system tests at this stage
 │   └── fixtures/
 │       ├── users.yml
-│       ├── employees.yml
-│       └── salary_histories.yml
+│       ├── job_titles.yml
+│       └── employees.yml                ← minimal stub (one record for deletion guard tests)
 └── config/
     └── routes.rb
 ```
-
-I put complex business logic — insights aggregations and employee filtering — in `app/services/` rather than in controllers or models. This keeps models focused on state and validations, and makes the business logic independently testable.
-
-I handle JSON rendering with PORO serializer classes in `app/serializers/` rather than inline `render json:` calls in controllers. This makes the response shape explicit and testable without coupling it to the controller.
-
-I test API endpoints via `test/integration/api/` rather than `test/controllers/`. Integration tests exercise the full stack through the router, which is closer to how the API is actually consumed. Controller tests miss routing and middleware concerns.
-
-Hotwire views follow the same pattern — integration tests in `test/integration/` cover the auth guard and the happy-path render for each page. The underlying business logic is covered by service tests, not re-tested at the view layer.
-
-I'm using Rails fixtures (YAML) for test data rather than FactoryBot. Fixtures are the Rails default, fast, and deterministic — no additional dependency needed.
-
-I keep the seed script and source name files together in `db/seeds/` rather than inlining everything into `db/seeds.rb`, keeping the seeds directory self-contained.
 
 ---
 
 ### Controller hierarchy
 
 ```
-ApplicationController           (authenticate_user!, after_sign_out_path_for)
-├── PagesController             (Hotwire — home / future dashboard)
-├── EmployeesController         (Hotwire)
-├── InsightsController          (Hotwire)
-└── Api::V1::BaseController     (JWT strategy)
+ApplicationController                 (authenticate_user!, after_sign_out_path_for)
+├── PagesController                   (Hotwire — home)
+├── JobTitlesController               (Hotwire — full CRUD)
+├── EmployeesController               (Hotwire — stub, pending)
+├── InsightsController                (Hotwire — stub, pending)
+└── Api::V1::BaseController           (JWT strategy) [not yet implemented]
     ├── Api::V1::Auth::SessionsController
     ├── Api::V1::Auth::RegistrationsController
     ├── Api::V1::EmployeesController
     └── Api::V1::Insights::SalaryController
 ```
 
-`authenticate_user!` lives in `ApplicationController` and protects all Hotwire pages. Devise controllers are exempted automatically. `Api::V1::BaseController` inherits the same guard but applies it via the JWT strategy for the JSON API.
+`authenticate_user!` lives in `ApplicationController` and protects all Hotwire pages. Devise controllers are exempted automatically. `Api::V1::BaseController` will inherit the same guard but apply it via the JWT strategy for the JSON API.
 
 The Devise `users/sessions`, `users/registrations`, and `users/passwords` controller overrides were originally planned to handle Turbo form responses. Devise 5.0 resolved this natively via the `responders` gem — those overrides are no longer needed and have been omitted.
 
@@ -154,12 +148,15 @@ devise_for :users
 
 root "pages#home"
 
+resources :job_titles
+
 resources :employees do
   member { patch :salary }
 end
 
 get "insights", to: "insights#index"
 
+# Not yet implemented:
 namespace :api do
   namespace :v1 do
     devise_for :users, controllers: {
@@ -179,6 +176,18 @@ namespace :api do
   end
 end
 ```
+
+---
+
+## Design notes
+
+I put complex business logic — insights aggregations and employee filtering — in `app/services/` rather than in controllers or models. This keeps models focused on state and validations, and makes the business logic independently testable.
+
+I handle JSON rendering with PORO serializer classes in `app/serializers/` rather than inline `render json:` calls in controllers. This makes the response shape explicit and testable without coupling it to the controller.
+
+I test Hotwire endpoints via `test/integration/` rather than `test/controllers/`. Integration tests exercise the full stack through the router, which is closer to how the application is actually consumed. Controller tests miss routing and middleware concerns.
+
+I'm using Rails fixtures (YAML) for test data rather than FactoryBot. Fixtures are the Rails default, fast, and deterministic — no additional dependency needed.
 
 ---
 

@@ -56,6 +56,16 @@ With 10,000 employees, fetching the full dataset and filtering in the browser is
 
 ---
 
+## JobTitle as a managed reference table
+
+The employee record originally stored job title as free text. That creates a data quality problem: "Software Engineer", "software engineer", and "Softwre Engineer" are treated as three distinct dimensions in insight groupings, silently distorting averages and counts.
+
+To prevent this, job titles are managed by HR Managers as a separate reference table. Employees reference a `job_title_id` foreign key rather than entering text directly. The unique constraint on `job_titles.name` enforces a single canonical form per title, and the `countries` gem resolves the display name at runtime so the UI always shows the full title without storing redundant string data on each employee row.
+
+This also prevents orphaned references — deleting a job title that still has employees assigned is blocked at the model layer, keeping the reference data consistent.
+
+---
+
 ## Bulk upsert for the seed script
 
 The spec says engineers run the seed script regularly, and that performance matters. A naïve row-by-row insert of 10,000 employees is slow, and running it twice doubles the count. Instead, I use Rails' `upsert_all`, keyed on `email`, so a single database round-trip inserts or updates all 10,000 rows. The script is idempotent by design — running it any number of times produces the same result.
