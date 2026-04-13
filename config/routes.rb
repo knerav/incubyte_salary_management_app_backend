@@ -11,6 +11,8 @@ Rails.application.routes.draw do
 
   devise_for :users
 
+  get "organisation_settings", to: "pages#organisation_settings", as: :organisation_settings
+
   resources :job_titles
   resources :departments
 

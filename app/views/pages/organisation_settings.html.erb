@@ -1,0 +1,16 @@
+<div class="max-w-3xl mx-auto px-4 py-10">
+  <h1 class="text-2xl font-bold text-gray-900 mb-2">Organisation Settings</h1>
+  <p class="text-sm text-gray-500 mb-8">Manage the reference data used across employee records and insights.</p>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <%= link_to job_titles_path, class: "group block bg-white rounded-xl border border-gray-200 shadow-sm px-8 py-7 hover:border-indigo-400 hover:shadow-md transition-all" do %>
+      <h2 class="text-base font-semibold text-gray-900 group-hover:text-indigo-600 mb-1">Job Titles</h2>
+      <p class="text-sm text-gray-500">Add, edit, or remove the canonical job titles assigned to employees.</p>
+    <% end %>
+
+    <%= link_to departments_path, class: "group block bg-white rounded-xl border border-gray-200 shadow-sm px-8 py-7 hover:border-indigo-400 hover:shadow-md transition-all" do %>
+      <h2 class="text-base font-semibold text-gray-900 group-hover:text-indigo-600 mb-1">Departments</h2>
+      <p class="text-sm text-gray-500">Add, edit, or remove the departments used to organise employees and insights.</p>
+    <% end %>
+  </div>
+</div>
