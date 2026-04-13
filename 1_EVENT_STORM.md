@@ -14,6 +14,12 @@ To recap my understanding of the system at hand, it's is a salary management too
 - `UserPasswordResetRequested`
 - `UserPasswordReset`
 
+**Job Title domain:**
+
+- `JobTitleAdded`
+- `JobTitleUpdated`
+- `JobTitleDeleted`
+
 **Employee domain:**
 
 - `EmployeeAdded`
@@ -49,6 +55,10 @@ To recap my understanding of the system at hand, it's is a salary management too
              [UserSignedIn]
                    │
                    ▼
+[JobTitleAdded] ──► [JobTitleUpdated]
+                    [JobTitleDeleted]
+                   │
+                   ▼
 [EmployeeDataSeeded]
         │
         ▼
@@ -64,7 +74,7 @@ To recap my understanding of the system at hand, it's is a salary management too
 [UserPasswordResetRequested] ──► [UserPasswordReset]
 ```
 
-The authentication domain is a prerequisite — no employee or insight commands are reachable without a signed-in user. `SalaryHistoryRecorded` is fired automatically as a side effect of `EmployeeSalaryUpdated` (most likely through a callback).
+The authentication domain is a prerequisite — no job title, employee, or insight commands are reachable without a signed-in user. Job titles are a prerequisite for adding employees — an employee must be assigned to an existing job title. `SalaryHistoryRecorded` is fired automatically as a side effect of `EmployeeSalaryUpdated` (most likely through a callback).
 
 ---
 
@@ -77,6 +87,9 @@ The authentication domain is a prerequisite — no employee or insight commands 
 | `SignOut`                      | `UserSignedOut`                  | _HR Manager_     |
 | `RequestPasswordReset`         | `UserPasswordResetRequested`     | _HR Manager_     |
 | `ResetPassword`                | `UserPasswordReset`              | _HR Manager_     |
+| `AddJobTitle`                  | `JobTitleAdded`                  | _HR Manager_     |
+| `UpdateJobTitle`               | `JobTitleUpdated`                | _HR Manager_     |
+| `DeleteJobTitle`               | `JobTitleDeleted`                | _HR Manager_     |
 | `AddEmployee`                  | `EmployeeAdded`                  | _HR Manager_     |
 | `UpdateEmployee`               | `EmployeeUpdated`                | _HR Manager_     |
 | `UpdateSalary`                 | `EmployeeSalaryUpdated`          | _HR Manager_     |
@@ -106,9 +119,17 @@ Owns:
 - JWT identity (jti — rotated on each sign-in and sign-out, used by JTIMatcher for token revocation)
 - Password recovery token
 
+**Aggregate: JobTitle**
+
+A managed reference aggregate. HR Managers maintain the canonical list of job titles for the organisation. Employees are associated to a job title via a foreign key, ensuring that all job titles used in employee records and insight queries are consistent and free of data entry errors.
+
+Owns:
+
+- Name
+
 **Aggregate: Employee**
 
-The only mutable domain object within the employee domain. It handles all write commands and is the source of truth for all employee state.
+The primary mutable domain object within the employee domain. It handles all write commands and is the source of truth for all employee state.
 
 Owns:
 
