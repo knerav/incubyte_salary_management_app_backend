@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_13_075258) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_13_104507) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -43,6 +43,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_13_075258) do
     t.index ["name"], name: "index_job_titles_on_name", unique: true
   end
 
+  create_table "salary_histories", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "currency", null: false
+    t.date "effective_from", null: false
+    t.bigint "employee_id", null: false
+    t.decimal "salary", precision: 15, scale: 2, null: false
+    t.datetime "updated_at", null: false
+    t.index ["effective_from"], name: "idx_salary_histories_effective_from"
+    t.index ["employee_id", "effective_from"], name: "idx_salary_histories_employee_effective"
+    t.index ["employee_id"], name: "index_salary_histories_on_employee_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "current_sign_in_at"
@@ -63,4 +75,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_13_075258) do
   end
 
   add_foreign_key "employees", "job_titles"
+  add_foreign_key "salary_histories", "employees"
 end
