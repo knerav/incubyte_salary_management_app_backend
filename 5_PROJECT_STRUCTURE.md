@@ -20,10 +20,10 @@ incubyte-salary-management/
 ├── app/
 │   ├── controllers/
 │   │   ├── application_controller.rb    ← authenticate_user!, after_sign_out_path_for
-│   │   ├── pages_controller.rb          ← Hotwire (home / future dashboard)
+│   │   ├── pages_controller.rb          ← Hotwire (home)
 │   │   ├── job_titles_controller.rb     ← Hotwire (full CRUD)
-│   │   ├── employees_controller.rb      ← Hotwire (stub — full CRUD pending)
-│   │   ├── insights_controller.rb       ← Hotwire (stub — pending)
+│   │   ├── employees_controller.rb      ← Hotwire (full CRUD + salary action)
+│   │   ├── insights_controller.rb       ← Hotwire (filter + aggregations)
 │   │   └── api/                         ← [not yet implemented]
 │   │       └── v1/
 │   │           ├── base_controller.rb
@@ -34,10 +34,11 @@ incubyte-salary-management/
 │   │           └── insights/
 │   │               └── salary_controller.rb
 │   ├── models/
-│   │   ├── user.rb
-│   │   ├── job_title.rb                 ← validates name presence/uniqueness, deletion guard
-│   │   ├── employee.rb                  ← stub (belongs_to :job_title — full model pending)
-│   │   └── salary_history.rb            ← [not yet implemented]
+│   │   ├── user.rb                      ← Devise, JTIMatcher, trackable
+│   │   ├── job_title.rb                 ← presence/uniqueness validations, deletion guard
+│   │   ├── employee.rb                  ← validations, soft delete scope, full_name,
+│   │   │                                   salary history callback
+│   │   └── salary_history.rb            ← validations, before_update immutability guard
 │   ├── serializers/                     ← [not yet implemented]
 │   │   ├── employee_serializer.rb
 │   │   └── insights/
@@ -54,7 +55,8 @@ incubyte-salary-management/
 │       │   ├── application.html.erb     ← Main app layout (authenticated pages)
 │       │   └── devise.html.erb          ← Auth layout (sign in, sign up, password reset)
 │       ├── shared/
-│       │   └── _navbar.html.erb         ← Logo, nav links, sign out button
+│       │   └── _navbar.html.erb         ← Logo, nav links (Home, Employees, Job Titles,
+│       │                                   Insights), sign out button
 │       ├── devise/
 │       │   ├── sessions/
 │       │   │   └── new.html.erb
@@ -74,26 +76,33 @@ incubyte-salary-management/
 │       │   ├── new.html.erb
 │       │   ├── edit.html.erb
 │       │   └── _form.html.erb
-│       ├── employees/                   ← [stub views — full implementation pending]
-│       │   └── index.html.erb
-│       └── insights/                    ← [stub — pending]
-│           └── index.html.erb
+│       ├── employees/
+│       │   ├── index.html.erb
+│       │   ├── show.html.erb            ← profile + inline salary update form
+│       │   ├── new.html.erb
+│       │   ├── edit.html.erb
+│       │   └── _form.html.erb
+│       └── insights/
+│           └── index.html.erb           ← filter bar, summary stats, job title breakdown
 ├── db/
 │   ├── migrate/
 │   │   ├── 20260412163853_devise_create_users.rb
 │   │   ├── 20260413073224_create_job_titles.rb
-│   │   └── 20260413075258_create_employees.rb  ← stub migration; full model pending
+│   │   ├── 20260413075258_create_employees.rb
+│   │   └── 20260413104507_create_salary_histories.rb
 │   ├── schema.rb
 │   └── seeds.rb                         ← seeds default HR Manager user
 ├── test/
 │   ├── models/
 │   │   ├── user_test.rb
-│   │   └── job_title_test.rb
+│   │   ├── job_title_test.rb
+│   │   ├── employee_test.rb
+│   │   └── salary_history_test.rb
 │   ├── integration/
 │   │   ├── pages_test.rb
-│   │   ├── employees_test.rb            ← [written — pending green; employee model not yet complete]
-│   │   ├── insights_test.rb
 │   │   ├── job_titles_test.rb
+│   │   ├── employees_test.rb
+│   │   ├── insights_test.rb
 │   │   ├── user_sessions_test.rb
 │   │   ├── user_registrations_test.rb
 │   │   └── api/                         ← [not yet implemented]
@@ -113,7 +122,8 @@ incubyte-salary-management/
 │   └── fixtures/
 │       ├── users.yml
 │       ├── job_titles.yml
-│       └── employees.yml                ← minimal stub (one record for deletion guard tests)
+│       ├── employees.yml                ← john_doe, jane_smith, deleted_employee
+│       └── salary_histories.yml         ← two entries for john_doe, one for jane_smith
 └── config/
     └── routes.rb
 ```
@@ -126,8 +136,8 @@ incubyte-salary-management/
 ApplicationController                 (authenticate_user!, after_sign_out_path_for)
 ├── PagesController                   (Hotwire — home)
 ├── JobTitlesController               (Hotwire — full CRUD)
-├── EmployeesController               (Hotwire — stub, pending)
-├── InsightsController                (Hotwire — stub, pending)
+├── EmployeesController               (Hotwire — full CRUD + salary action)
+├── InsightsController                (Hotwire — filter + SQL aggregations)
 └── Api::V1::BaseController           (JWT strategy) [not yet implemented]
     ├── Api::V1::Auth::SessionsController
     ├── Api::V1::Auth::RegistrationsController
