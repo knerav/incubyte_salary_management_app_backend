@@ -45,6 +45,17 @@ class SalaryHistoryTest < ActiveSupport::TestCase
     assert_equal employees(:john_doe), salary_histories(:john_doe_raise).employee
   end
 
+  # — Immutability ——————————————————————————————————————————————————————————
+
+  test "cannot be updated once created" do
+    history = salary_histories(:john_doe_raise)
+    original_salary = history.salary
+
+    history.update(salary: 999999.00)
+
+    assert_equal original_salary, history.reload.salary
+  end
+
   # — Ordering ——————————————————————————————————————————————————————————————
 
   test "records are ordered chronologically by effective_from" do
@@ -56,14 +67,4 @@ class SalaryHistoryTest < ActiveSupport::TestCase
                  histories.last.effective_from
   end
 
-  # — Immutability ——————————————————————————————————————————————————————————
-
-  test "cannot be updated once created" do
-    history = salary_histories(:john_doe_raise)
-    original_salary = history.salary
-
-    history.update(salary: 999999.00)
-
-    assert_equal original_salary, history.reload.salary
-  end
 end
