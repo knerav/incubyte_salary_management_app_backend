@@ -18,6 +18,10 @@ class Employee < ApplicationRecord
 
   after_update :record_salary_history, if: :saved_change_to_salary?
 
+  def full_name
+    "#{first_name} #{last_name}"
+  end
+
   private
 
   def record_salary_history

@@ -112,6 +112,12 @@ class EmployeeTest < ActiveSupport::TestCase
     assert_includes employee.errors[:employment_type], "is not included in the list"
   end
 
+  # — Instance methods ——————————————————————————————————————————————————————
+
+  test "full_name returns first and last name" do
+    assert_equal "John Doe", employees(:john_doe).full_name
+  end
+
   # — Associations ——————————————————————————————————————————————————————————
 
   test "belongs to a job title" do
