@@ -15,6 +15,8 @@
             class: "rounded-lg px-4 py-2 text-sm font-medium transition-colors #{current_page?(root_path) ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" %>
       <%= link_to "Employees", employees_path,
             class: "rounded-lg px-4 py-2 text-sm font-medium transition-colors #{current_page?(employees_path) ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" %>
+      <%= link_to "Job Titles", job_titles_path,
+            class: "rounded-lg px-4 py-2 text-sm font-medium transition-colors #{current_page?(job_titles_path) ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" %>
       <%= link_to "Insights", insights_path,
             class: "rounded-lg px-4 py-2 text-sm font-medium transition-colors #{current_page?(insights_path) ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}" %>
     </div>
