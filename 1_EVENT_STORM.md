@@ -20,6 +20,12 @@ To recap my understanding of the system at hand, it's is a salary management too
 - `JobTitleUpdated`
 - `JobTitleDeleted`
 
+**Department domain:**
+
+- `DepartmentAdded`
+- `DepartmentUpdated`
+- `DepartmentDeleted`
+
 **Employee domain:**
 
 - `EmployeeAdded`
@@ -57,6 +63,8 @@ To recap my understanding of the system at hand, it's is a salary management too
                    ▼
 [JobTitleAdded] ──► [JobTitleUpdated]
                     [JobTitleDeleted]
+[DepartmentAdded] ─► [DepartmentUpdated]
+                    [DepartmentDeleted]
                    │
                    ▼
 [EmployeeDataSeeded]
@@ -90,6 +98,9 @@ The authentication domain is a prerequisite — no job title, employee, or insig
 | `AddJobTitle`                  | `JobTitleAdded`                  | _HR Manager_     |
 | `UpdateJobTitle`               | `JobTitleUpdated`                | _HR Manager_     |
 | `DeleteJobTitle`               | `JobTitleDeleted`                | _HR Manager_     |
+| `AddDepartment`                | `DepartmentAdded`                | _HR Manager_     |
+| `UpdateDepartment`             | `DepartmentUpdated`              | _HR Manager_     |
+| `DeleteDepartment`             | `DepartmentDeleted`              | _HR Manager_     |
 | `AddEmployee`                  | `EmployeeAdded`                  | _HR Manager_     |
 | `UpdateEmployee`               | `EmployeeUpdated`                | _HR Manager_     |
 | `UpdateSalary`                 | `EmployeeSalaryUpdated`          | _HR Manager_     |
@@ -122,6 +133,14 @@ Owns:
 **Aggregate: JobTitle**
 
 A managed reference aggregate. HR Managers maintain the canonical list of job titles for the organisation. Employees are associated to a job title via a foreign key, ensuring that all job titles used in employee records and insight queries are consistent and free of data entry errors.
+
+Owns:
+
+- Name
+
+**Aggregate: Department**
+
+A managed reference aggregate, parallel to `JobTitle`. HR Managers maintain the canonical list of departments. Employees are associated to a department via a foreign key, preventing the same data quality issues that free-text department names would introduce in insight groupings.
 
 Owns:
 

@@ -42,6 +42,19 @@ Job titles are managed by HR Managers rather than stored as free-text on the emp
 
 ---
 
+### departments
+
+| Column       | Type        | Constraints                 |
+| ------------ | ----------- | --------------------------- |
+| `id`         | `bigint`    | Primary key, auto-increment |
+| `name`       | `varchar`   | NOT NULL, UNIQUE            |
+| `created_at` | `timestamp` | NOT NULL                    |
+| `updated_at` | `timestamp` | NOT NULL                    |
+
+Departments are managed by HR Managers rather than stored as free-text on the employee record, for the same reason as job titles — free-text department names would produce unreliable insight groupings. The unique constraint on `name` enforces a single canonical form per department.
+
+---
+
 ### employees
 
 | Column          | Type             | Constraints                                           |
@@ -51,7 +64,7 @@ Job titles are managed by HR Managers rather than stored as free-text on the emp
 | `last_name`     | `varchar`        | NOT NULL                                              |
 | `email`         | `varchar`        | NOT NULL, UNIQUE                                      |
 | `job_title_id`  | `bigint`         | NOT NULL, FK → `job_titles.id`                        |
-| `department`    | `varchar`        | NOT NULL                                              |
+| `department_id` | `bigint`         | NOT NULL, FK → `departments.id`                       |
 | `country`       | `varchar(2)`     | NOT NULL — ISO 3166-1 alpha-2 code (e.g. `"US"`)      |
 | `salary`        | `decimal(15, 2)` | NOT NULL                                              |
 | `currency`      | `varchar(3)`     | NOT NULL, default `'USD'`                             |
@@ -96,15 +109,22 @@ Each record is written once when a salary changes and never updated. `effective_
 | Primary key | `id`    | Row lookup                                  |
 | Unique      | `name`  | Prevents duplicate titles at database level |
 
+**departments indexes:**
+
+| Index       | Columns | Reason                                           |
+| ----------- | ------- | ------------------------------------------------ |
+| Primary key | `id`    | Row lookup                                       |
+| Unique      | `name`  | Prevents duplicate departments at database level |
+
 **employees indexes:**
 
 | Index                             | Columns                | Reason                                                                                 |
 | --------------------------------- | ---------------------- | -------------------------------------------------------------------------------------- |
 | Primary key                       | `id`                   | Row lookup                                                                             |
 | Unique                            | `email`                | Uniqueness constraint                                                                  |
-| `idx_employees_job_title_id`      | `job_title_id`         | FK lookup and insights queries group by job title                                      |
-| `idx_employees_department`        | `department`           | Insights queries filter and group by department                                        |
-| `idx_employees_country`           | `country`              | Insights queries filter and group by country                                           |
+| `idx_employees_job_title_id`      | `job_title_id`            | FK lookup and insights queries group by job title                                      |
+| `idx_employees_department_id`     | `department_id`           | FK lookup and insights queries filter and group by department                          |
+| `idx_employees_country`           | `country`                 | Insights queries filter and group by country                                           |
 | `idx_employees_country_job_title` | `(country, job_title_id)` | Composite — covers the "avg salary for job title in country" query without a full scan |
 | `idx_employees_deleted_at`        | `deleted_at`           | Soft delete — default scope filters `WHERE deleted_at IS NULL` on every query          |
 
@@ -124,6 +144,8 @@ Each record is written once when a salary changes and never updated. `effective_
 The `jti` column on `users` is indexed with a unique constraint because JTIMatcher validates it on every authenticated API request — without an index, that's a full table scan per request.
 
 `job_title_id` replaces the original free-text `job_title` column on `employees`. Storing a foreign key rather than a string ensures that all job titles in the system are canonical and HR Manager-managed, which makes insight groupings reliable.
+
+`department_id` replaces the original free-text `department` column on `employees` for the same reason. Free-text department names produce unreliable insight groupings — "Engineering", "engineering", and "Engingeering" would be treated as three distinct dimensions. A foreign key to a managed reference table prevents this. Both job titles and departments are managed from a Company Settings area in the UI.
 
 `country` is stored as an ISO 3166-1 alpha-2 code (`varchar(2)`) rather than a full country name. Codes are short, unambiguous, and consistent — the `countries` gem resolves the display name at runtime, so the UI can show "United States" while the database stores `"US"`. This prevents the same data quality issues as free-text job titles.
 

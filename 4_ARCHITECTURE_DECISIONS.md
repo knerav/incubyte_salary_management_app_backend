@@ -64,6 +64,8 @@ To prevent this, job titles are managed by HR Managers as a separate reference t
 
 This also prevents orphaned references — deleting a job title that still has employees assigned is blocked at the model layer, keeping the reference data consistent.
 
+The same approach applies to `department`. Free-text department names carry the same data quality risk, so `department_id` replaces the original `department` varchar on employees. Both job titles and departments are managed from a Company Settings page in the UI, keeping reference data management in one place rather than buried inside the employee form.
+
 ---
 
 ## Bulk upsert for the seed script
