@@ -1,0 +1,20 @@
+software_engineer:
+  name: Software Engineer
+
+senior_software_engineer:
+  name: Senior Software Engineer
+
+product_manager:
+  name: Product Manager
+
+designer:
+  name: Designer
+
+qa_engineer:
+  name: QA Engineer
+
+data_analyst:
+  name: Data Analyst
+
+hr_manager:
+  name: HR Manager
