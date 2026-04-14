@@ -12,13 +12,13 @@ class HistoricalSalaryService
     employee_scope = EmployeeFilterService.new(@filters).call
 
     period_sql = case @group_by
-                 when "quarter"
-                   "TO_CHAR(effective_from, 'YYYY') || '-Q' || TO_CHAR(effective_from, 'Q')"
-                 when "year"
-                   "TO_CHAR(effective_from, 'YYYY')"
-                 else
-                   "TO_CHAR(effective_from, 'YYYY-MM')"
-                 end
+    when "quarter"
+      "TO_CHAR(effective_from, 'YYYY') || '-Q' || TO_CHAR(effective_from, 'Q')"
+    when "year"
+      "TO_CHAR(effective_from, 'YYYY')"
+    else
+      "TO_CHAR(effective_from, 'YYYY-MM')"
+    end
 
     rows = SalaryHistory
       .where(employee: employee_scope)

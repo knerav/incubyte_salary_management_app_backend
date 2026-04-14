@@ -66,5 +66,4 @@ class SalaryHistoryTest < ActiveSupport::TestCase
     assert_equal salary_histories(:john_doe_raise).effective_from,
                  histories.last.effective_from
   end
-
 end
