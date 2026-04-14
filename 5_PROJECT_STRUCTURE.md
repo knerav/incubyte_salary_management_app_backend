@@ -25,15 +25,15 @@ incubyte-salary-management/
 │   │   ├── departments_controller.rb    ← Hotwire (full CRUD)
 │   │   ├── employees_controller.rb      ← Hotwire (full CRUD + salary action)
 │   │   ├── insights_controller.rb       ← Hotwire (filter + aggregations)
-│   │   └── api/                         ← [not yet implemented]
+│   │   └── api/
 │   │       └── v1/
-│   │           ├── base_controller.rb
-│   │           ├── employees_controller.rb
+│   │           ├── base_controller.rb   ← authenticate_user!, render helpers
+│   │           ├── employees_controller.rb  ← JSON CRUD + salary action
 │   │           ├── auth/
 │   │           │   ├── sessions_controller.rb
 │   │           │   └── registrations_controller.rb
 │   │           └── insights/
-│   │               └── salary_controller.rb
+│   │               └── salary_controller.rb  ← index + history
 │   ├── models/
 │   │   ├── user.rb                      ← Devise, JTIMatcher, trackable
 │   │   ├── job_title.rb                 ← presence/uniqueness validations, deletion guard
@@ -41,24 +41,21 @@ incubyte-salary-management/
 │   │   ├── employee.rb                  ← validations, soft delete scope, full_name,
 │   │   │                                   salary history callback
 │   │   └── salary_history.rb            ← validations, before_update immutability guard
-│   ├── serializers/                     ← [not yet implemented]
+│   ├── serializers/
 │   │   ├── employee_serializer.rb
-│   │   └── insights/
-│   │       ├── salary_insights_serializer.rb
-│   │       └── historical_salary_serializer.rb
-│   ├── services/                        ← [not yet implemented]
-│   │   ├── employees/
-│   │   │   └── filter_service.rb
-│   │   └── insights/
-│   │       ├── salary_insights_service.rb
-│   │       └── historical_salary_service.rb
+│   │   ├── salary_insights_serializer.rb
+│   │   └── historical_salary_serializer.rb
+│   ├── services/
+│   │   ├── employee_filter_service.rb
+│   │   ├── salary_insights_service.rb
+│   │   └── historical_salary_service.rb
 │   └── views/
 │       ├── layouts/
 │       │   ├── application.html.erb     ← Main app layout (authenticated pages)
 │       │   └── devise.html.erb          ← Auth layout (sign in, sign up, password reset)
 │       ├── shared/
-│       │   └── _navbar.html.erb         ← Logo, nav links (Home, Employees, Job Titles,
-│       │                                   Departments, Insights), sign out button
+│       │   └── _navbar.html.erb         ← Logo, nav links (Home, Employees, Settings,
+│       │                                   Insights), profile dropdown with sign out
 │       ├── devise/
 │       │   ├── sessions/
 │       │   │   └── new.html.erb
@@ -72,7 +69,8 @@ incubyte-salary-management/
 │       │       ├── _error_messages.html.erb
 │       │       └── _links.html.erb
 │       ├── pages/
-│       │   └── home.html.erb
+│       │   ├── home.html.erb
+│       │   └── organisation_settings.html.erb  ← card links to Job Titles and Departments
 │       ├── job_titles/
 │       │   ├── index.html.erb
 │       │   ├── new.html.erb
@@ -116,19 +114,19 @@ incubyte-salary-management/
 │   │   ├── insights_test.rb
 │   │   ├── user_sessions_test.rb
 │   │   ├── user_registrations_test.rb
-│   │   └── api/                         ← [not yet implemented]
+│   │   └── api/
 │   │       └── v1/
 │   │           ├── employees_test.rb
 │   │           └── insights/
 │   │               └── salary_test.rb
-│   ├── services/                        ← [not yet implemented]
-│   │   ├── employees/
-│   │   │   └── filter_service_test.rb
-│   │   └── insights/
-│   │       ├── salary_insights_service_test.rb
-│   │       └── historical_salary_service_test.rb
-│   ├── serializers/                     ← [not yet implemented]
-│   │   └── employee_serializer_test.rb
+│   ├── services/
+│   │   ├── employee_filter_service_test.rb
+│   │   ├── salary_insights_service_test.rb
+│   │   └── historical_salary_service_test.rb
+│   ├── serializers/
+│   │   ├── employee_serializer_test.rb
+│   │   ├── salary_insights_serializer_test.rb
+│   │   └── historical_salary_serializer_test.rb
 │   ├── system/                          ← placeholder; no system tests at this stage
 │   └── fixtures/
 │       ├── users.yml
@@ -151,14 +149,14 @@ ApplicationController                 (authenticate_user!, after_sign_out_path_f
 ├── DepartmentsController             (Hotwire — full CRUD)
 ├── EmployeesController               (Hotwire — full CRUD + salary action)
 ├── InsightsController                (Hotwire — filter + SQL aggregations)
-└── Api::V1::BaseController           (JWT strategy) [not yet implemented]
+└── Api::V1::BaseController           (JWT strategy — authenticate_user!, render helpers)
     ├── Api::V1::Auth::SessionsController
     ├── Api::V1::Auth::RegistrationsController
     ├── Api::V1::EmployeesController
     └── Api::V1::Insights::SalaryController
 ```
 
-`authenticate_user!` lives in `ApplicationController` and protects all Hotwire pages. Devise controllers are exempted automatically. `Api::V1::BaseController` will inherit the same guard but apply it via the JWT strategy for the JSON API.
+`authenticate_user!` lives in `ApplicationController` and protects all Hotwire pages. Devise controllers are exempted automatically. `Api::V1::BaseController` inherits the same guard and applies it via the JWT strategy for the JSON API. The API uses `devise_scope :user` to route auth endpoints through the existing `:user` Warden scope, keeping JWT dispatch, revocation, and `authenticate_user!` all aligned.
 
 The Devise `users/sessions`, `users/registrations`, and `users/passwords` controller overrides were originally planned to handle Turbo form responses. Devise 5.0 resolved this natively via the `responders` gem — those overrides are no longer needed and have been omitted.
 
@@ -171,6 +169,8 @@ devise_for :users
 
 root "pages#home"
 
+get "organisation_settings", to: "pages#organisation_settings"
+
 resources :job_titles
 resources :departments
 
@@ -180,20 +180,20 @@ end
 
 get "insights", to: "insights#index"
 
-# Not yet implemented:
 namespace :api do
   namespace :v1 do
-    devise_for :users, controllers: {
-      sessions:      'api/v1/auth/sessions',
-      registrations: 'api/v1/auth/registrations'
-    }
+    devise_scope :user do
+      post   "users/sign_in",  to: "auth/sessions#create"
+      delete "users/sign_out", to: "auth/sessions#destroy"
+      post   "users",          to: "auth/registrations#create"
+    end
 
     resources :employees do
       member { patch :salary }
     end
 
     namespace :insights do
-      resource :salary, only: [:show] do
+      resources :salary, only: [:index] do
         get :history, on: :collection
       end
     end

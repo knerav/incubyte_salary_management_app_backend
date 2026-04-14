@@ -46,7 +46,8 @@ Integration tests come last and exercise the full API stack — through the rout
 Key cases I cover per endpoint:
 
 - Happy path returns the expected status code and response shape
-- Missing or invalid parameters return a `422` with a meaningful error
+- Invalid parameters return a `422` with a meaningful error
+- Requests without a JWT token return `401`
 - Requesting a deleted employee returns `404`
 - The salary endpoint writes to `salary_histories`
 - The list endpoint paginates and filters correctly

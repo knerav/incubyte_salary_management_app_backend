@@ -2,6 +2,56 @@
 
 All endpoints are prefixed with `/api/v1`. Both frontends are served from the same controllers via `respond_to` — JSON for the Next.js frontend, HTML for the Hotwire frontend. This document covers the JSON contract only.
 
+---
+
+## Authentication
+
+All API endpoints except sign-in and sign-up require a JWT Bearer token in the `Authorization` header:
+
+```
+Authorization: Bearer <token>
+```
+
+Requests without a valid token return `401 Unauthorized`.
+
+### Sign in
+
+```
+POST /api/v1/users/sign_in
+```
+
+**Request body:**
+
+```json
+{ "user": { "email": "hr@company.com", "password": "Password1!" } }
+```
+
+**Response `200`:** The JWT token is returned in the `Authorization` response header. Tokens expire after 30 minutes.
+
+### Sign out
+
+```
+DELETE /api/v1/users/sign_out
+```
+
+Revokes the current token via the JTIMatcher strategy — the user's `jti` is rotated, invalidating all previously issued tokens for that account.
+
+**Response `200`:** `{ "message": "Signed out successfully." }`
+
+### Sign up
+
+```
+POST /api/v1/users
+```
+
+**Request body:**
+
+```json
+{ "user": { "email": "hr@company.com", "password": "Password1!", "password_confirmation": "Password1!" } }
+```
+
+**Response `201`:** `{ "message": "Signed up successfully." }`
+
 > In ordinary circumstances I would not pair a React frontend with a Rails monolith (as the Hotwire stack covers that need without introducing a separate frontend). I've opted for this combination specifically for the scope of this assignment to demonstrate that I'm comfortable working with both a Rails monolith and an isolated frontend/backend architecture.
 
 > I'm using a flat JSON format rather than the JSON:API specification. In a larger system with multiple resources and complex relationships, I would reach for the `jsonapi-serializer` gem — it enforces a consistent envelope, handles relationships cleanly, and scales well across a large API surface. For this scope, the added verbosity isn't justified.
@@ -85,7 +135,7 @@ GET /api/v1/employees/:id
 **Response `404`:**
 
 ```json
-{ "error": "Employee not found" }
+{ "error": "Not found" }
 ```
 
 ---
@@ -103,8 +153,8 @@ POST /api/v1/employees
   "first_name": "Jane",
   "last_name": "Smith",
   "email": "jane.smith@company.com",
-  "job_title": "Software Engineer",
-  "department": "Engineering",
+  "job_title_id": 1,
+  "department_id": 2,
   "country": "US",
   "salary": "95000.00",
   "currency": "USD",
@@ -155,8 +205,7 @@ I use a dedicated endpoint for salary changes so that writing to `salary_histori
 ```json
 {
   "salary": "105000.00",
-  "currency": "USD",
-  "effective_from": "2025-04-01"
+  "currency": "USD"
 }
 ```
 
@@ -188,8 +237,6 @@ Employees are soft deleted by setting `deleted_at`, retaining the record for his
 GET /api/v1/insights/salary
 ```
 
-I require at least one filter parameter — returning aggregates over all 10,000 employees with no filter is valid but not useful to an HR manager.
-
 **Query parameters:**
 
 | Parameter    | Type   | Description          |
@@ -206,21 +253,19 @@ Filters are additive — multiple parameters narrow the result set.
 {
   "filters": {
     "country": "US",
-    "department": "Engineering"
+    "department_id": "2"
   },
   "insights": {
+    "employee_count": 430,
     "min_salary": "60000.00",
     "max_salary": "210000.00",
     "avg_salary": "118500.00",
-    "employee_count": 430
+    "breakdowns": [
+      { "job_title": "Staff Engineer", "avg_salary": "175000.00" },
+      { "job_title": "Senior Engineer", "avg_salary": "140000.00" }
+    ]
   }
 }
-```
-
-**Response `422`:**
-
-```json
-{ "error": "At least one filter parameter is required" }
 ```
 
 ---
