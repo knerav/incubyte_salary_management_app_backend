@@ -30,36 +30,36 @@
   <div class="grid grid-cols-4 gap-4 mb-8">
     <div class="bg-white shadow-sm rounded-xl border border-gray-200 px-6 py-5">
       <p class="text-xs text-gray-500 mb-1">Employees</p>
-      <p class="text-2xl font-bold text-gray-900"><%= @employee_count %></p>
+      <p class="text-2xl font-bold text-gray-900"><%= @insights.employee_count %></p>
     </div>
     <div class="bg-white shadow-sm rounded-xl border border-gray-200 px-6 py-5">
       <p class="text-xs text-gray-500 mb-1">Average Salary</p>
       <p class="text-2xl font-bold text-gray-900">
-        <%= @avg_salary ? number_with_delimiter(@avg_salary.round) : "—" %>
+        <%= @insights.avg_salary ? number_with_delimiter(@insights.avg_salary.round) : "—" %>
       </p>
     </div>
     <div class="bg-white shadow-sm rounded-xl border border-gray-200 px-6 py-5">
       <p class="text-xs text-gray-500 mb-1">Min Salary</p>
       <p class="text-2xl font-bold text-gray-900">
-        <%= @min_salary ? number_with_delimiter(@min_salary.round) : "—" %>
+        <%= @insights.min_salary ? number_with_delimiter(@insights.min_salary.round) : "—" %>
       </p>
     </div>
     <div class="bg-white shadow-sm rounded-xl border border-gray-200 px-6 py-5">
       <p class="text-xs text-gray-500 mb-1">Max Salary</p>
       <p class="text-2xl font-bold text-gray-900">
-        <%= @max_salary ? number_with_delimiter(@max_salary.round) : "—" %>
+        <%= @insights.max_salary ? number_with_delimiter(@insights.max_salary.round) : "—" %>
       </p>
     </div>
   </div>
 
   <%# Breakdown by job title %>
-  <% if @breakdowns.any? %>
+  <% if @insights.breakdowns.any? %>
     <div class="bg-white shadow-sm rounded-xl border border-gray-200">
       <div class="px-6 py-4 border-b border-gray-100">
         <h2 class="text-sm font-semibold text-gray-700">Average Salary by Job Title</h2>
       </div>
       <div class="divide-y divide-gray-100">
-        <% @breakdowns.each do |title, avg| %>
+        <% @insights.breakdowns.each do |title, avg| %>
           <div class="flex items-center justify-between px-6 py-3">
             <span class="text-sm text-gray-700"><%= title %></span>
             <span class="text-sm font-medium text-gray-900"><%= number_with_delimiter(avg.round) %></span>
