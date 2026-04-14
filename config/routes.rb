@@ -21,4 +21,24 @@ Rails.application.routes.draw do
   end
 
   get "insights", to: "insights#index", as: :insights
+
+  namespace :api do
+    namespace :v1 do
+      devise_scope :user do
+        post   "users/sign_in",  to: "auth/sessions#create",       as: :api_v1_user_session
+        delete "users/sign_out", to: "auth/sessions#destroy",      as: :destroy_api_v1_user_session
+        post   "users",          to: "auth/registrations#create",  as: :api_v1_user_registration
+      end
+
+      resources :employees do
+        member { patch :salary }
+      end
+
+      namespace :insights do
+        resources :salary, only: [:index] do
+          get :history, on: :collection
+        end
+      end
+    end
+  end
 end

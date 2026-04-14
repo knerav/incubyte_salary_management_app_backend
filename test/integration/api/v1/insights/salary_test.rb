@@ -7,7 +7,7 @@ module Api
   # — Authentication guard —————————————————————————————————————————————————
 
   test "returns 401 without a JWT token" do
-    get api_v1_insights_salary_url, as: :json
+    get api_v1_insights_salary_index_url, as: :json
     assert_response :unauthorized
   end
 
@@ -15,13 +15,13 @@ module Api
 
   test "returns salary insights" do
     token = api_sign_in(users(:hr_manager))
-    get api_v1_insights_salary_url, params: { country: "US" }, headers: { Authorization: token }, as: :json
+    get api_v1_insights_salary_index_url, params: { country: "US" }, headers: { Authorization: token }, as: :json
     assert_response :ok
   end
 
   test "response includes filters and insights keys" do
     token = api_sign_in(users(:hr_manager))
-    get api_v1_insights_salary_url, params: { country: "US" }, headers: { Authorization: token }, as: :json
+    get api_v1_insights_salary_index_url, params: { country: "US" }, headers: { Authorization: token }, as: :json
     body = response.parsed_body
     assert body.key?("filters")
     assert body.key?("insights")
@@ -29,7 +29,7 @@ module Api
 
   test "insights include employee_count, min, max, avg salary and breakdowns" do
     token = api_sign_in(users(:hr_manager))
-    get api_v1_insights_salary_url, params: { country: "US" }, headers: { Authorization: token }, as: :json
+    get api_v1_insights_salary_index_url, params: { country: "US" }, headers: { Authorization: token }, as: :json
     insights = response.parsed_body["insights"]
     %w[employee_count min_salary max_salary avg_salary breakdowns].each do |field|
       assert insights.key?(field), "expected insights to include #{field}"
@@ -38,7 +38,7 @@ module Api
 
   test "filters insights by country" do
     token = api_sign_in(users(:hr_manager))
-    get api_v1_insights_salary_url, params: { country: "US" }, headers: { Authorization: token }, as: :json
+    get api_v1_insights_salary_index_url, params: { country: "US" }, headers: { Authorization: token }, as: :json
     assert_equal 1, response.parsed_body["insights"]["employee_count"]
   end
 
