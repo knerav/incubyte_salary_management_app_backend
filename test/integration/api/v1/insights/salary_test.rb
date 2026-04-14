@@ -1,0 +1,87 @@
+require "test_helper"
+
+module Api
+  module V1
+    module Insights
+      class SalaryTest < ActionDispatch::IntegrationTest
+  # — Authentication guard —————————————————————————————————————————————————
+
+  test "returns 401 without a JWT token" do
+    get api_v1_insights_salary_url, as: :json
+    assert_response :unauthorized
+  end
+
+  # — Current insights —————————————————————————————————————————————————————
+
+  test "returns salary insights" do
+    token = api_sign_in(users(:hr_manager))
+    get api_v1_insights_salary_url, params: { country: "US" }, headers: { Authorization: token }, as: :json
+    assert_response :ok
+  end
+
+  test "response includes filters and insights keys" do
+    token = api_sign_in(users(:hr_manager))
+    get api_v1_insights_salary_url, params: { country: "US" }, headers: { Authorization: token }, as: :json
+    body = response.parsed_body
+    assert body.key?("filters")
+    assert body.key?("insights")
+  end
+
+  test "insights include employee_count, min, max, avg salary and breakdowns" do
+    token = api_sign_in(users(:hr_manager))
+    get api_v1_insights_salary_url, params: { country: "US" }, headers: { Authorization: token }, as: :json
+    insights = response.parsed_body["insights"]
+    %w[employee_count min_salary max_salary avg_salary breakdowns].each do |field|
+      assert insights.key?(field), "expected insights to include #{field}"
+    end
+  end
+
+  test "filters insights by country" do
+    token = api_sign_in(users(:hr_manager))
+    get api_v1_insights_salary_url, params: { country: "US" }, headers: { Authorization: token }, as: :json
+    assert_equal 1, response.parsed_body["insights"]["employee_count"]
+  end
+
+  # — Historical insights ———————————————————————————————————————————————————
+
+  test "returns 401 on history without a JWT token" do
+    get history_api_v1_insights_salary_index_url, as: :json
+    assert_response :unauthorized
+  end
+
+  test "returns historical salary series" do
+    token = api_sign_in(users(:hr_manager))
+    get history_api_v1_insights_salary_index_url,
+      params: { from: "2022-01-01", to: "2023-12-31", group_by: "year" },
+      headers: { Authorization: token },
+      as: :json
+    assert_response :ok
+  end
+
+  test "historical response includes filters, group_by, and series keys" do
+    token = api_sign_in(users(:hr_manager))
+    get history_api_v1_insights_salary_index_url,
+      params: { from: "2022-01-01", to: "2023-12-31", group_by: "year" },
+      headers: { Authorization: token },
+      as: :json
+    body = response.parsed_body
+    assert body.key?("filters")
+    assert body.key?("group_by")
+    assert body.key?("series")
+  end
+
+  test "historical series entries include period, avg_salary, and employee_count" do
+    token = api_sign_in(users(:hr_manager))
+    get history_api_v1_insights_salary_index_url,
+      params: { from: "2022-01-01", to: "2023-12-31", group_by: "year" },
+      headers: { Authorization: token },
+      as: :json
+    entry = response.parsed_body["series"].first
+    assert entry.key?("period")
+    assert entry.key?("avg_salary")
+    assert entry.key?("employee_count")
+  end
+      end
+    end
+  end
+end

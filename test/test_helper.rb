@@ -22,5 +22,12 @@ module ActionDispatch
       post user_session_url,
         params: { user: { email: user.email, password: password } }
     end
+
+    def api_sign_in(user, password: "Password1!")
+      post "/api/v1/users/sign_in",
+        params: { user: { email: user.email, password: password } },
+        as: :json
+      response.headers["Authorization"]
+    end
   end
 end
