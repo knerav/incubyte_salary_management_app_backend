@@ -34,6 +34,9 @@ Rails.application.routes.draw do
         member { patch :salary }
       end
 
+      resources :job_titles, only: [:index]
+      resources :departments, only: [:index]
+
       namespace :insights do
         resources :salary, only: [:index] do
           get :history, on: :collection
