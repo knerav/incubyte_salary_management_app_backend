@@ -14,10 +14,14 @@ class EmployeesController < ApplicationController
   def create
     @employee = Employee.new(employee_params)
 
-    if @employee.save
-      redirect_to employee_path(@employee), notice: "Employee was successfully created."
-    else
-      render :new, status: :unprocessable_content
+    respond_to do |format|
+      if @employee.save
+        format.turbo_stream
+        format.html { redirect_to employee_path(@employee), notice: "Employee was successfully created." }
+      else
+        format.turbo_stream { render :new, status: :unprocessable_content }
+        format.html { render :new, status: :unprocessable_content }
+      end
     end
   end
 
