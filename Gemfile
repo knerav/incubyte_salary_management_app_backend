@@ -29,6 +29,9 @@ gem "devise-jwt", "~> 0.12"
 # CORS
 gem "rack-cors"
 
+# Country/currency data
+gem "countries"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

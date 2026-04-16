@@ -5,14 +5,18 @@ class SalaryInsightsSerializer
   end
 
   def as_json
+    country = @filters[:country] || @filters["country"] || CurrencyLookup::DEFAULT_COUNTRY
+
     {
       filters: @filters,
       insights: {
-        employee_count: @insights.employee_count,
-        min_salary:     format_salary(@insights.min_salary),
-        max_salary:     format_salary(@insights.max_salary),
-        avg_salary:     format_salary(@insights.avg_salary),
-        breakdowns:     serialize_breakdowns
+        employee_count:  @insights.employee_count,
+        min_salary:      format_salary(@insights.min_salary),
+        max_salary:      format_salary(@insights.max_salary),
+        avg_salary:      format_salary(@insights.avg_salary),
+        breakdowns:      serialize_breakdowns,
+        currency_code:   CurrencyLookup.code_for(country),
+        currency_symbol: CurrencyLookup.symbol_for(country)
       }
     }
   end

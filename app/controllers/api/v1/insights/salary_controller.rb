@@ -18,6 +18,8 @@ class Api::V1::Insights::SalaryController < Api::V1::BaseController
   private
 
   def filter_params
-    params.permit(:country, :department_id, :job_title_id)
+    permitted = params.permit(:country, :department_id, :job_title_id)
+    permitted[:country] ||= CurrencyLookup::DEFAULT_COUNTRY
+    permitted
   end
 end
