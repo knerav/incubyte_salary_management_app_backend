@@ -36,6 +36,19 @@ class JobTitlesTest < ActionDispatch::IntegrationTest
     assert_response :ok
   end
 
+  test "creates a job title via turbo stream and returns stream response" do
+    sign_in_as users(:hr_manager)
+
+    assert_difference "JobTitle.count", 1 do
+      post job_titles_url,
+        params: { job_title: { name: "Engineering Manager" } },
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :ok
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+  end
+
   test "re-renders the new form with 422 when name is blank" do
     sign_in_as users(:hr_manager)
 
@@ -44,6 +57,19 @@ class JobTitlesTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :unprocessable_content
+  end
+
+  test "re-renders modal via turbo stream with 422 when name is blank" do
+    sign_in_as users(:hr_manager)
+
+    assert_no_difference "JobTitle.count" do
+      post job_titles_url,
+        params: { job_title: { name: "" } },
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :unprocessable_content
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
   end
 
   test "re-renders the new form with 422 on a duplicate name" do

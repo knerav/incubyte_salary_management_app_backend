@@ -16,15 +16,27 @@ class OrganisationSettingsTest < ActionDispatch::IntegrationTest
     assert_response :ok
   end
 
-  test "includes a link to job titles" do
+  test "renders the job titles list inline" do
     sign_in_as users(:hr_manager)
     get organisation_settings_url
-    assert_select "a[href='#{job_titles_path}']"
+    assert_select "turbo-frame#job_titles_list"
   end
 
-  test "includes a link to departments" do
+  test "renders the departments list inline" do
     sign_in_as users(:hr_manager)
     get organisation_settings_url
-    assert_select "a[href='#{departments_path}']"
+    assert_select "turbo-frame#departments_list"
+  end
+
+  test "displays existing job titles on the page" do
+    sign_in_as users(:hr_manager)
+    get organisation_settings_url
+    assert_select "turbo-frame#job_titles_list", text: /#{job_titles(:software_engineer).name}/
+  end
+
+  test "displays existing departments on the page" do
+    sign_in_as users(:hr_manager)
+    get organisation_settings_url
+    assert_select "turbo-frame#departments_list", text: /#{departments(:engineering).name}/
   end
 end
