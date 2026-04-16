@@ -197,6 +197,29 @@ class EmployeesTest < ActionDispatch::IntegrationTest
     assert_equal "text/vnd.turbo-stream.html", response.media_type
   end
 
+  test "turbo stream create response includes a flash notice" do
+    sign_in_as users(:hr_manager)
+
+    post employees_url,
+      params: {
+        employee: {
+          first_name: "Bob",
+          last_name: "Jones",
+          email: "bob.jones@company.com",
+          job_title_id: job_titles(:senior_software_engineer).id,
+          department_id: departments(:engineering).id,
+          country: "US",
+          salary: "110000.00",
+          currency: "USD",
+          employment_type: "full_time",
+          hired_on: "2024-01-15"
+        }
+      },
+      headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+    assert_match "Employee was successfully created", response.body
+  end
+
   test "re-renders the new form with 422 when required fields are blank" do
     sign_in_as users(:hr_manager)
 
@@ -272,6 +295,16 @@ class EmployeesTest < ActionDispatch::IntegrationTest
     assert_response :ok
     assert_equal "text/vnd.turbo-stream.html", response.media_type
     assert_equal departments(:product), employees(:john_doe).reload.department
+  end
+
+  test "turbo stream update response includes a flash notice" do
+    sign_in_as users(:hr_manager)
+
+    patch employee_url(employees(:john_doe)),
+          params: { employee: { department_id: departments(:product).id } },
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+    assert_match "Employee was successfully updated", response.body
   end
 
   test "updates an employee with valid params and redirects for plain HTML" do
