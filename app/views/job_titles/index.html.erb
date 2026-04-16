@@ -1,8 +1,8 @@
 <div class="max-w-3xl mx-auto px-4 py-10">
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Job Titles</h1>
+    <h1 class="text-2xl font-bold text-neutral-900">Job Titles</h1>
     <%= link_to "Add Job Title", new_job_title_path,
-          class: "rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors" %>
+          class: "rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 transition-colors" %>
   </div>
 
   <% if notice.present? %>
@@ -11,14 +11,14 @@
     </div>
   <% end %>
 
-  <div class="bg-white shadow-sm rounded-xl border border-gray-200 divide-y divide-gray-100">
+  <div class="bg-white shadow-sm rounded-xl border border-neutral-200 divide-y divide-neutral-100">
     <% if @job_titles.any? %>
       <% @job_titles.each do |job_title| %>
         <div class="flex items-center justify-between px-6 py-4">
-          <span class="text-sm text-gray-900"><%= job_title.name %></span>
+          <span class="text-sm text-neutral-900"><%= job_title.name %></span>
           <div class="flex items-center gap-3">
             <%= link_to "Edit", edit_job_title_path(job_title),
-                  class: "text-sm text-indigo-600 hover:text-indigo-500 font-medium" %>
+                  class: "text-sm text-amber-700 hover:text-amber-600 font-medium" %>
             <%= button_to "Delete", job_title_path(job_title),
                   method: :delete,
                   class: "text-sm text-red-600 hover:text-red-500 font-medium bg-transparent border-0 cursor-pointer p-0",
@@ -27,8 +27,8 @@
         </div>
       <% end %>
     <% else %>
-      <div class="px-6 py-8 text-center text-sm text-gray-500">
-        No job titles yet. <%= link_to "Add one", new_job_title_path, class: "text-indigo-600 hover:text-indigo-500 font-medium" %>.
+      <div class="px-6 py-8 text-center text-sm text-neutral-500">
+        No job titles yet. <%= link_to "Add one", new_job_title_path, class: "text-amber-700 hover:text-amber-600 font-medium" %>.
       </div>
     <% end %>
   </div>

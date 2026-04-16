@@ -1,21 +1,21 @@
 <div class="max-w-6xl mx-auto px-4 py-10">
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-gray-900">Employees</h1>
+    <h1 class="text-2xl font-bold text-neutral-900">Employees</h1>
     <%= link_to new_employee_path,
           data: { turbo_frame: "modal" },
-          class: "rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors" do %>
+          class: "rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 transition-colors" do %>
       Add Employee
     <% end %>
   </div>
 
-  <div class="bg-white shadow-sm rounded-xl border border-gray-200">
-    <%= turbo_frame_tag "employees_list", class: "block divide-y divide-gray-100" do %>
+  <div class="bg-white shadow-sm rounded-xl border border-neutral-200">
+    <%= turbo_frame_tag "employees_list", class: "block divide-y divide-neutral-100" do %>
       <% if @employees.any? %>
         <% @employees.each do |employee| %>
           <%= render employee %>
         <% end %>
       <% else %>
-        <div id="employees_empty_state" class="px-6 py-8 text-center text-sm text-gray-500">
+        <div id="employees_empty_state" class="px-6 py-8 text-center text-sm text-neutral-500">
           No employees yet.
         </div>
       <% end %>
