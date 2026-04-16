@@ -341,6 +341,22 @@ class EmployeesTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_content
   end
 
+  # — Show modal ————————————————————————————————————————————————————————————
+
+  test "show modal salary update form renders a currency select dropdown" do
+    sign_in_as users(:hr_manager)
+    get employee_url(employees(:john_doe)), headers: { "Turbo-Frame" => "modal" }
+    assert_select "select[name='employee[currency]']"
+  end
+
+  test "currency dropdown in show modal is populated with currency codes" do
+    sign_in_as users(:hr_manager)
+    get employee_url(employees(:john_doe)), headers: { "Turbo-Frame" => "modal" }
+    assert_select "select[name='employee[currency]'] option[value='USD']"
+    assert_select "select[name='employee[currency]'] option[value='EUR']"
+    assert_select "select[name='employee[currency]'] option[value='INR']"
+  end
+
   # — Salary update —————————————————————————————————————————————————————————
 
   test "updates salary and records a salary history entry" do
