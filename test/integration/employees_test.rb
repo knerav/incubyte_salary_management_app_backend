@@ -157,13 +157,34 @@ class EmployeesTest < ActionDispatch::IntegrationTest
 
   # — Edit / Update —————————————————————————————————————————————————————————
 
-  test "renders the edit employee form" do
+  test "renders the edit modal when requested via turbo frame" do
+    sign_in_as users(:hr_manager)
+    get edit_employee_url(employees(:john_doe)),
+        headers: { "Turbo-Frame" => "modal" }
+    assert_response :ok
+    assert_select "turbo-frame[id='modal']"
+    assert_select "dialog"
+  end
+
+  test "renders the edit form for a plain HTML request" do
     sign_in_as users(:hr_manager)
     get edit_employee_url(employees(:john_doe))
     assert_response :ok
   end
 
-  test "updates an employee with valid params and redirects" do
+  test "updates an employee with valid params and returns turbo stream" do
+    sign_in_as users(:hr_manager)
+
+    patch employee_url(employees(:john_doe)),
+          params: { employee: { department_id: departments(:product).id } },
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+    assert_response :ok
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+    assert_equal departments(:product), employees(:john_doe).reload.department
+  end
+
+  test "updates an employee with valid params and redirects for plain HTML" do
     sign_in_as users(:hr_manager)
 
     patch employee_url(employees(:john_doe)), params: {
@@ -176,7 +197,18 @@ class EmployeesTest < ActionDispatch::IntegrationTest
     assert_equal departments(:product), employees(:john_doe).reload.department
   end
 
-  test "re-renders the edit form with 422 when required fields are blank" do
+  test "re-renders the edit modal via turbo stream with 422 when required fields are blank" do
+    sign_in_as users(:hr_manager)
+
+    patch employee_url(employees(:john_doe)),
+          params: { employee: { first_name: "" } },
+          headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+    assert_response :unprocessable_content
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+  end
+
+  test "re-renders the edit form with 422 for plain HTML when required fields are blank" do
     sign_in_as users(:hr_manager)
 
     patch employee_url(employees(:john_doe)), params: {

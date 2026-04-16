@@ -3,7 +3,7 @@
         class="m-auto rounded-xl border border-neutral-200 shadow-xl p-0 w-full max-w-2xl backdrop:bg-neutral-900/50">
   <div class="px-8 py-6 max-h-[90vh] overflow-y-auto">
     <div class="flex items-center justify-between mb-5">
-      <h2 class="text-lg font-semibold text-neutral-900">New Employee</h2>
+      <h2 class="text-lg font-semibold text-neutral-900"><%= employee.persisted? ? "Edit Employee" : "New Employee" %></h2>
       <button type="button"
               data-action="click->modal#close"
               class="text-neutral-400 hover:text-neutral-600 transition-colors">

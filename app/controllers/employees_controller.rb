@@ -28,10 +28,14 @@ class EmployeesController < ApplicationController
   def edit; end
 
   def update
-    if @employee.update(employee_params)
-      redirect_to employee_path(@employee), notice: "Employee was successfully updated."
-    else
-      render :edit, status: :unprocessable_content
+    respond_to do |format|
+      if @employee.update(employee_params)
+        format.turbo_stream
+        format.html { redirect_to employee_path(@employee), notice: "Employee was successfully updated." }
+      else
+        format.turbo_stream { render :edit, status: :unprocessable_content }
+        format.html { render :edit, status: :unprocessable_content }
+      end
     end
   end
 
