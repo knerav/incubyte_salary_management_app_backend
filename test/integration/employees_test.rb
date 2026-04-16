@@ -422,4 +422,15 @@ class EmployeesTest < ActionDispatch::IntegrationTest
     get employee_url(employees(:john_doe))
     assert_response :not_found
   end
+
+  test "delete via turbo stream removes the employee row and shows a flash notice" do
+    sign_in_as users(:hr_manager)
+
+    delete employee_url(employees(:john_doe)),
+           headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+    assert_response :ok
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+    assert_match "Employee was successfully deleted", response.body
+  end
 end
