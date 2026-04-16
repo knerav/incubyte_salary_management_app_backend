@@ -20,7 +20,7 @@ incubyte-salary-management/
 ├── app/
 │   ├── controllers/
 │   │   ├── application_controller.rb    ← authenticate_user!, after_sign_out_path_for
-│   │   ├── pages_controller.rb          ← Hotwire (home)
+│   │   ├── pages_controller.rb          ← Hotwire (organisation_settings only)
 │   │   ├── job_titles_controller.rb     ← Hotwire (full CRUD)
 │   │   ├── departments_controller.rb    ← Hotwire (full CRUD)
 │   │   ├── employees_controller.rb      ← Hotwire (full CRUD + salary action)
@@ -34,11 +34,17 @@ incubyte-salary-management/
 │   │           │   └── registrations_controller.rb
 │   │           └── insights/
 │   │               └── salary_controller.rb  ← index + history
+│   ├── helpers/
+│   │   └── application_helper.rb        ← country_options, currency_options,
+│   │                                       salary_change_percentage
+│   ├── lib/
+│   │   └── currency_lookup.rb           ← ISO 3166 currency code/symbol helpers
 │   ├── models/
 │   │   ├── user.rb                      ← Devise, JTIMatcher, trackable
 │   │   ├── job_title.rb                 ← presence/uniqueness validations, deletion guard
 │   │   ├── department.rb                ← presence/uniqueness validations, deletion guard
 │   │   ├── employee.rb                  ← validations, soft delete scope, full_name,
+│   │   │                                   ransackable_attributes, full_name_cont scope,
 │   │   │                                   salary history callback
 │   │   └── salary_history.rb            ← validations, before_update immutability guard
 │   ├── serializers/
@@ -54,8 +60,10 @@ incubyte-salary-management/
 │       │   ├── application.html.erb     ← Main app layout (authenticated pages)
 │       │   └── devise.html.erb          ← Auth layout (sign in, sign up, password reset)
 │       ├── shared/
-│       │   └── _navbar.html.erb         ← Logo, nav links (Home, Employees, Settings,
-│       │                                   Insights), profile dropdown with sign out
+│       │   ├── _navbar.html.erb         ← Logo (links to root), nav links (Employees,
+│       │   │                               Insights, Settings), profile dropdown
+│       │   ├── _flash.html.erb          ← Reusable flash notice/alert partial
+│       │   └── _alert.html.erb
 │       ├── devise/
 │       │   ├── sessions/
 │       │   │   └── new.html.erb
@@ -69,7 +77,6 @@ incubyte-salary-management/
 │       │       ├── _error_messages.html.erb
 │       │       └── _links.html.erb
 │       ├── pages/
-│       │   ├── home.html.erb
 │       │   └── organisation_settings.html.erb  ← card links to Job Titles and Departments
 │       ├── job_titles/
 │       │   ├── index.html.erb
@@ -82,11 +89,17 @@ incubyte-salary-management/
 │       │   ├── edit.html.erb
 │       │   └── _form.html.erb
 │       ├── employees/
-│       │   ├── index.html.erb
-│       │   ├── show.html.erb            ← profile + inline salary update form
+│       │   ├── index.html.erb           ← search bar (full-name), pagination, employee list
+│       │   ├── show.html.erb            ← profile, salary history table, salary update form
 │       │   ├── new.html.erb
 │       │   ├── edit.html.erb
-│       │   └── _form.html.erb
+│       │   ├── _form.html.erb           ← country + currency select dropdowns
+│       │   ├── _employee.html.erb
+│       │   ├── _modal.html.erb
+│       │   ├── create.turbo_stream.erb
+│       │   ├── update.turbo_stream.erb
+│       │   ├── salary.turbo_stream.erb
+│       │   └── destroy.turbo_stream.erb
 │       └── insights/
 │           └── index.html.erb           ← filter bar, summary stats, job title breakdown
 ├── db/
@@ -98,7 +111,10 @@ incubyte-salary-management/
 │   │   ├── 20260413164738_create_departments.rb
 │   │   └── 20260413164739_add_department_to_employees.rb
 │   ├── schema.rb
-│   └── seeds.rb                         ← seeds default HR Manager user
+│   └── seeds.rb                         ← 10 000 employees via upsert_all; idempotent
+├── lib/
+│   └── tasks/
+│       └── backfill_salary_histories.rake  ← one-time backfill for upsert-seeded employees
 ├── test/
 │   ├── models/
 │   │   ├── user_test.rb
@@ -107,13 +123,15 @@ incubyte-salary-management/
 │   │   ├── employee_test.rb
 │   │   └── salary_history_test.rb
 │   ├── integration/
-│   │   ├── pages_test.rb
+│   │   ├── organisation_settings_test.rb
 │   │   ├── job_titles_test.rb
 │   │   ├── departments_test.rb
 │   │   ├── employees_test.rb
 │   │   ├── insights_test.rb
-│   │   ├── user_sessions_test.rb
-│   │   ├── user_registrations_test.rb
+│   │   ├── user_account_test.rb
+│   │   ├── users/
+│   │   │   ├── sessions_test.rb
+│   │   │   └── registrations_test.rb
 │   │   └── api/
 │   │       └── v1/
 │   │           ├── employees_test.rb
@@ -127,13 +145,15 @@ incubyte-salary-management/
 │   │   ├── employee_serializer_test.rb
 │   │   ├── salary_insights_serializer_test.rb
 │   │   └── historical_salary_serializer_test.rb
+│   ├── tasks/
+│   │   └── backfill_salary_histories_test.rb
 │   ├── system/                          ← placeholder; no system tests at this stage
 │   └── fixtures/
 │       ├── users.yml
 │       ├── job_titles.yml
 │       ├── departments.yml
 │       ├── employees.yml                ← john_doe, jane_smith, deleted_employee
-│       └── salary_histories.yml         ← two entries for john_doe, one for jane_smith
+│       └── salary_histories.yml         ← two entries each for john_doe and jane_smith
 └── config/
     └── routes.rb
 ```
@@ -144,7 +164,7 @@ incubyte-salary-management/
 
 ```
 ApplicationController                 (authenticate_user!, after_sign_out_path_for)
-├── PagesController                   (Hotwire — home)
+├── PagesController                   (Hotwire — organisation_settings)
 ├── JobTitlesController               (Hotwire — full CRUD)
 ├── DepartmentsController             (Hotwire — full CRUD)
 ├── EmployeesController               (Hotwire — full CRUD + salary action)
@@ -167,7 +187,7 @@ The Devise `users/sessions`, `users/registrations`, and `users/passwords` contro
 ```ruby
 devise_for :users
 
-root "pages#home"
+root "employees#index"
 
 get "organisation_settings", to: "pages#organisation_settings"
 
@@ -191,6 +211,9 @@ namespace :api do
     resources :employees do
       member { patch :salary }
     end
+
+    resources :job_titles,   only: [:index]
+    resources :departments,  only: [:index]
 
     namespace :insights do
       resources :salary, only: [:index] do

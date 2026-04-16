@@ -229,6 +229,46 @@ Employees are soft deleted by setting `deleted_at`, retaining the record for his
 
 ---
 
+## Reference data
+
+### List job titles
+
+```
+GET /api/v1/job_titles
+```
+
+**Response `200`:**
+
+```json
+{
+  "job_titles": [
+    { "id": 1, "name": "Software Engineer" },
+    { "id": 2, "name": "Product Manager" }
+  ]
+}
+```
+
+---
+
+### List departments
+
+```
+GET /api/v1/departments
+```
+
+**Response `200`:**
+
+```json
+{
+  "departments": [
+    { "id": 1, "name": "Engineering" },
+    { "id": 2, "name": "Product" }
+  ]
+}
+```
+
+---
+
 ## Insights
 
 ### Current salary insights

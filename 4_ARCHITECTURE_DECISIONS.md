@@ -30,7 +30,7 @@ A side benefit: restoring a deleted employee is trivial — just nullify `delete
 
 Salary changes need to be written to `salary_histories` to support time-series insights. If salary were editable through the general `PATCH /employees/:id` endpoint, it would be possible to change a salary without recording the history — either by accident or oversight. To make that impossible, I exclude salary from the general update endpoint entirely. The dedicated `PATCH /employees/:id/salary` endpoint is the only write path to `salary_histories`, making history recording structural rather than procedural.
 
-This endpoint also requires an `effective_from` date, which allows backdated salary changes rather than always defaulting to today.
+The `effective_from` date defaults to today — it is derived automatically from `Date.today` when the salary history record is written, rather than being supplied by the caller. Backdated salary changes are not supported through the UI at this stage.
 
 ---
 

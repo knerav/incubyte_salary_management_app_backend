@@ -28,6 +28,8 @@ With the models in place, I move directly to integration tests for each resource
 
 Each integration test suite is written before the controller and views exist, providing the red state that drives their implementation.
 
+Hotwire-specific behaviour is tested here too — Turbo Frame responses, Turbo Stream templates (create, update, salary, destroy), flash notice injection, modal rendering, search form structure, pagination nav presence, and dropdown population. These tests assert on rendered HTML and response media type rather than relying on manual verification.
+
 ### 3. Services — `test/services/`
 
 This is where I put my most meaningful tests. The service objects encapsulate the core business logic — salary aggregations, historical trend queries, and employee filtering. I test these directly rather than through the API, which keeps them fast and makes failures easy to diagnose.
@@ -58,11 +60,15 @@ I use serializer tests to verify that the response shape matches the API contrac
 
 ---
 
+### 5. Rake tasks — `test/tasks/`
+
+One-off data tasks (such as the salary history backfill) get their own test class. These tests invoke the task directly via `Rake::Task`, assert on database state before and after, and verify idempotency by re-enabling and re-invoking the task.
+
+---
+
 ## What I'm not testing
 
 I don't test Rails internals. That `validates_presence_of` works, that `belongs_to` sets up the association, or that ActiveRecord can write to the database — these are framework guarantees, not application logic.
-
-I also don't cover the Hotwire views with automated tests. The HTML rendering is exercised manually during development, and the underlying logic is already covered by model and service tests.
 
 ---
 
