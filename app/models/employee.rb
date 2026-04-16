@@ -9,6 +9,14 @@ class Employee < ApplicationRecord
     []
   end
 
+  def self.ransackable_scopes(_auth_object = nil)
+    [ :full_name_cont ]
+  end
+
+  scope :full_name_cont, ->(query) {
+    where("CONCAT(first_name, ' ', last_name) ILIKE ?", "%#{query}%")
+  }
+
   belongs_to :job_title
   belongs_to :department
   has_many :salary_histories

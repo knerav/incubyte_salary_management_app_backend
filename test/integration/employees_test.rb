@@ -20,12 +20,12 @@ class EmployeesTest < ActionDispatch::IntegrationTest
     sign_in_as users(:hr_manager)
     get employees_url
     assert_select "form[action='#{employees_path}']"
-    assert_select "input[name='q[first_name_or_last_name_cont]']"
+    assert_select "input[name='q[full_name_cont]']"
   end
 
   test "search by first name returns matching employees" do
     sign_in_as users(:hr_manager)
-    get employees_url, params: { q: { first_name_or_last_name_cont: "John" } }
+    get employees_url, params: { q: { full_name_cont: "John" } }
     assert_response :ok
     assert_match "John", response.body
     assert_no_match "Jane", response.body
@@ -33,7 +33,7 @@ class EmployeesTest < ActionDispatch::IntegrationTest
 
   test "search by last name returns matching employees" do
     sign_in_as users(:hr_manager)
-    get employees_url, params: { q: { first_name_or_last_name_cont: "Smith" } }
+    get employees_url, params: { q: { full_name_cont: "Smith" } }
     assert_response :ok
     assert_match "Smith", response.body
     assert_no_match "Doe", response.body
@@ -41,24 +41,32 @@ class EmployeesTest < ActionDispatch::IntegrationTest
 
   test "search with no match returns empty list" do
     sign_in_as users(:hr_manager)
-    get employees_url, params: { q: { first_name_or_last_name_cont: "Zzznomatch" } }
+    get employees_url, params: { q: { full_name_cont: "Zzznomatch" } }
     assert_response :ok
     assert_select "#employees_empty_state"
   end
 
   test "search is case-insensitive" do
     sign_in_as users(:hr_manager)
-    get employees_url, params: { q: { first_name_or_last_name_cont: "john" } }
+    get employees_url, params: { q: { full_name_cont: "john" } }
     assert_response :ok
     assert_match "John", response.body
   end
 
   test "blank search returns all employees" do
     sign_in_as users(:hr_manager)
-    get employees_url, params: { q: { first_name_or_last_name_cont: "" } }
+    get employees_url, params: { q: { full_name_cont: "" } }
     assert_response :ok
     assert_match "John", response.body
     assert_match "Jane", response.body
+  end
+
+  test "search by full name returns matching employee" do
+    sign_in_as users(:hr_manager)
+    get employees_url, params: { q: { full_name_cont: "John Doe" } }
+    assert_response :ok
+    assert_select "##{dom_id(employees(:john_doe))}"
+    assert_select "##{dom_id(employees(:jane_smith))}", false
   end
 
   test "accepts a page param without error" do
