@@ -8,7 +8,9 @@
     <% end %>
   </div>
 
-  <div class="bg-white shadow-sm rounded-xl border border-neutral-200">
+  <%== @pagy.series_nav %>
+
+  <div class="bg-white shadow-sm rounded-xl border border-neutral-200 my-4">
     <%= turbo_frame_tag "employees_list", class: "block divide-y divide-neutral-100" do %>
       <% if @employees.any? %>
         <% @employees.each do |employee| %>
@@ -21,4 +23,6 @@
       <% end %>
     <% end %>
   </div>
+
+  <%== @pagy.series_nav %>
 </div>

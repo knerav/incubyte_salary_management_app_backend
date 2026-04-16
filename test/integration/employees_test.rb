@@ -16,6 +16,24 @@ class EmployeesTest < ActionDispatch::IntegrationTest
     assert_response :ok
   end
 
+  test "accepts a page param without error" do
+    sign_in_as users(:hr_manager)
+    get employees_url, params: { page: 1 }
+    assert_response :ok
+  end
+
+  test "renders pagination nav on the employees page" do
+    sign_in_as users(:hr_manager)
+    get employees_url
+    assert_select "nav.pagy.series-nav"
+  end
+
+  test "pagination nav appears twice (top and bottom)" do
+    sign_in_as users(:hr_manager)
+    get employees_url
+    assert_select "nav.pagy.series-nav", count: 2
+  end
+
   # — Show ——————————————————————————————————————————————————————————————————
 
   test "renders the employee profile" do
