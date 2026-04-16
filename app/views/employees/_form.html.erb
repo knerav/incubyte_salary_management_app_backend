@@ -12,20 +12,17 @@
   <div class="grid grid-cols-2 gap-5">
     <div>
       <%= f.label :first_name, class: "block text-sm font-medium text-neutral-700 mb-1" %>
-      <%= f.text_field :first_name,
-            class: "select-field" %>
+      <%= f.text_field :first_name, class: "input-field" %>
     </div>
     <div>
       <%= f.label :last_name, class: "block text-sm font-medium text-neutral-700 mb-1" %>
-      <%= f.text_field :last_name,
-            class: "select-field" %>
+      <%= f.text_field :last_name, class: "input-field" %>
     </div>
   </div>
 
   <div>
     <%= f.label :email, class: "block text-sm font-medium text-neutral-700 mb-1" %>
-    <%= f.email_field :email,
-          class: "select-field" %>
+    <%= f.email_field :email, class: "input-field" %>
   </div>
 
   <div>
@@ -69,8 +66,7 @@
 
   <div>
     <%= f.label :hired_on, class: "block text-sm font-medium text-neutral-700 mb-1" %>
-    <%= f.date_field :hired_on,
-          class: "select-field" %>
+    <%= f.date_field :hired_on, class: "input-field" %>
   </div>
 
   <div class="flex items-center gap-3 pt-2">
