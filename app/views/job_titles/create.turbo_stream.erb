@@ -1,0 +1,7 @@
+<%= turbo_stream.remove "job_titles_empty_state" %>
+<%= turbo_stream.append "job_titles_list" do %>
+  <%= render @job_title %>
+<% end %>
+<%= turbo_stream.replace :modal do %>
+  <%= turbo_frame_tag :modal %>
+<% end %>

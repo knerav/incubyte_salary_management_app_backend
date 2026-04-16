@@ -12,10 +12,14 @@ class DepartmentsController < ApplicationController
   def create
     @department = Department.new(department_params)
 
-    if @department.save
-      redirect_to departments_path, notice: "Department was successfully created."
-    else
-      render :new, status: :unprocessable_content
+    respond_to do |format|
+      if @department.save
+        format.turbo_stream
+        format.html { redirect_to departments_path, notice: "Department was successfully created." }
+      else
+        format.turbo_stream { render :new, status: :unprocessable_content }
+        format.html { render :new, status: :unprocessable_content }
+      end
     end
   end
 

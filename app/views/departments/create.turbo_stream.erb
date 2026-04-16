@@ -1,0 +1,7 @@
+<%= turbo_stream.remove "departments_empty_state" %>
+<%= turbo_stream.append "departments_list" do %>
+  <%= render @department %>
+<% end %>
+<%= turbo_stream.replace :modal do %>
+  <%= turbo_frame_tag :modal %>
+<% end %>

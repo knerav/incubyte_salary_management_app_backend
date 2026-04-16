@@ -12,10 +12,14 @@ class JobTitlesController < ApplicationController
   def create
     @job_title = JobTitle.new(job_title_params)
 
-    if @job_title.save
-      redirect_to job_titles_path, notice: "Job title was successfully created."
-    else
-      render :new, status: :unprocessable_content
+    respond_to do |format|
+      if @job_title.save
+        format.turbo_stream
+        format.html { redirect_to job_titles_path, notice: "Job title was successfully created." }
+      else
+        format.turbo_stream { render :new, status: :unprocessable_content }
+        format.html { render :new, status: :unprocessable_content }
+      end
     end
   end
 
