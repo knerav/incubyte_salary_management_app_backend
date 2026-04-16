@@ -82,15 +82,35 @@ class DepartmentsTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_content
   end
 
+  # — Show —————————————————————————————————————————————————————————————————
+
+  test "renders the department row for turbo frame cancel" do
+    sign_in_as users(:hr_manager)
+    get department_url(departments(:engineering))
+    assert_response :ok
+  end
+
   # — Edit / Update ————————————————————————————————————————————————————————
 
-  test "renders the edit department form" do
+  test "renders the inline edit form" do
     sign_in_as users(:hr_manager)
     get edit_department_url(departments(:engineering))
     assert_response :ok
   end
 
-  test "updates a department with valid params and redirects" do
+  test "updates a department with valid params and returns a turbo stream" do
+    sign_in_as users(:hr_manager)
+
+    patch department_url(departments(:qa)),
+      params: { department: { name: "Quality Assurance" } },
+      headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+    assert_response :ok
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+    assert_equal "Quality Assurance", departments(:qa).reload.name
+  end
+
+  test "updates a department with valid params and redirects for html" do
     sign_in_as users(:hr_manager)
 
     patch department_url(departments(:qa)), params: { department: { name: "Quality Assurance" } }
@@ -101,7 +121,18 @@ class DepartmentsTest < ActionDispatch::IntegrationTest
     assert_equal "Quality Assurance", departments(:qa).reload.name
   end
 
-  test "re-renders the edit form with 422 when name is blank" do
+  test "re-renders the inline edit form via turbo stream with 422 when name is blank" do
+    sign_in_as users(:hr_manager)
+
+    patch department_url(departments(:engineering)),
+      params: { department: { name: "" } },
+      headers: { "Accept" => "text/vnd.turbo-stream.html" }
+
+    assert_response :unprocessable_content
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+  end
+
+  test "re-renders the edit form with 422 when name is blank for html" do
     sign_in_as users(:hr_manager)
 
     patch department_url(departments(:engineering)), params: { department: { name: "" } }
