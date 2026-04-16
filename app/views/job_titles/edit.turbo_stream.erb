@@ -1,0 +1,5 @@
+<%= turbo_stream.replace dom_id(@job_title) do %>
+  <%= turbo_frame_tag dom_id(@job_title) do %>
+    <%= render "inline_form", job_title: @job_title %>
+  <% end %>
+<% end %>

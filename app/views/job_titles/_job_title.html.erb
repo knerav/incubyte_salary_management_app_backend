@@ -1,11 +1,13 @@
-<div id="<%= dom_id(job_title) %>" class="flex items-center justify-between px-6 py-4">
-  <span class="text-sm text-gray-900"><%= job_title.name %></span>
-  <div class="flex items-center gap-3">
-    <%= link_to "Edit", edit_job_title_path(job_title),
-          class: "text-sm text-indigo-600 hover:text-indigo-500 font-medium" %>
-    <%= button_to "Delete", job_title_path(job_title),
-          method: :delete,
-          class: "text-sm text-red-600 hover:text-red-500 font-medium bg-transparent border-0 cursor-pointer p-0",
-          data: { turbo_confirm: "Delete '#{job_title.name}'? This cannot be undone." } %>
+<%= turbo_frame_tag dom_id(job_title) do %>
+  <div class="flex items-center justify-between px-6 py-4">
+    <span class="text-sm text-gray-900"><%= job_title.name %></span>
+    <div class="flex items-center gap-3">
+      <%= link_to "Edit", edit_job_title_path(job_title),
+            class: "text-sm text-indigo-600 hover:text-indigo-500 font-medium" %>
+      <%= button_to "Delete", job_title_path(job_title),
+            method: :delete,
+            class: "text-sm text-red-600 hover:text-red-500 font-medium bg-transparent border-0 cursor-pointer p-0",
+            data: { turbo_confirm: "Delete '#{job_title.name}'? This cannot be undone." } %>
+    </div>
   </div>
-</div>
+<% end %>

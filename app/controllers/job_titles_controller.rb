@@ -1,9 +1,11 @@
 class JobTitlesController < ApplicationController
-  before_action :set_job_title, only: %i[edit update destroy]
+  before_action :set_job_title, only: %i[show edit update destroy]
 
   def index
     @job_titles = JobTitle.order(:name)
   end
+
+  def show; end
 
   def new
     @job_title = JobTitle.new
@@ -26,10 +28,14 @@ class JobTitlesController < ApplicationController
   def edit; end
 
   def update
-    if @job_title.update(job_title_params)
-      redirect_to job_titles_path, notice: "Job title was successfully updated."
-    else
-      render :edit, status: :unprocessable_content
+    respond_to do |format|
+      if @job_title.update(job_title_params)
+        format.turbo_stream { render turbo_stream: turbo_stream.replace(@job_title, partial: "job_titles/job_title", locals: { job_title: @job_title }) }
+        format.html { redirect_to job_titles_path, notice: "Job title was successfully updated." }
+      else
+        format.turbo_stream { render :edit, status: :unprocessable_content }
+        format.html { render :edit, status: :unprocessable_content }
+      end
     end
   end
 

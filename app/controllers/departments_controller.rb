@@ -1,9 +1,11 @@
 class DepartmentsController < ApplicationController
-  before_action :set_department, only: %i[edit update destroy]
+  before_action :set_department, only: %i[show edit update destroy]
 
   def index
     @departments = Department.order(:name)
   end
+
+  def show; end
 
   def new
     @department = Department.new
@@ -26,10 +28,14 @@ class DepartmentsController < ApplicationController
   def edit; end
 
   def update
-    if @department.update(department_params)
-      redirect_to departments_path, notice: "Department was successfully updated."
-    else
-      render :edit, status: :unprocessable_content
+    respond_to do |format|
+      if @department.update(department_params)
+        format.turbo_stream { render turbo_stream: turbo_stream.replace(@department, partial: "departments/department", locals: { department: @department }) }
+        format.html { redirect_to departments_path, notice: "Department was successfully updated." }
+      else
+        format.turbo_stream { render :edit, status: :unprocessable_content }
+        format.html { render :edit, status: :unprocessable_content }
+      end
     end
   end
 

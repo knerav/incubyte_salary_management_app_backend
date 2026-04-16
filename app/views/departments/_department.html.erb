@@ -1,11 +1,13 @@
-<div id="<%= dom_id(department) %>" class="flex items-center justify-between px-6 py-4">
-  <span class="text-sm text-gray-900"><%= department.name %></span>
-  <div class="flex items-center gap-3">
-    <%= link_to "Edit", edit_department_path(department),
-          class: "text-sm text-indigo-600 hover:text-indigo-500 font-medium" %>
-    <%= button_to "Delete", department_path(department),
-          method: :delete,
-          class: "text-sm text-red-600 hover:text-red-500 font-medium bg-transparent border-0 cursor-pointer p-0",
-          data: { turbo_confirm: "Delete '#{department.name}'? This cannot be undone." } %>
+<%= turbo_frame_tag dom_id(department) do %>
+  <div class="flex items-center justify-between px-6 py-4">
+    <span class="text-sm text-gray-900"><%= department.name %></span>
+    <div class="flex items-center gap-3">
+      <%= link_to "Edit", edit_department_path(department),
+            class: "text-sm text-indigo-600 hover:text-indigo-500 font-medium" %>
+      <%= button_to "Delete", department_path(department),
+            method: :delete,
+            class: "text-sm text-red-600 hover:text-red-500 font-medium bg-transparent border-0 cursor-pointer p-0",
+            data: { turbo_confirm: "Delete '#{department.name}'? This cannot be undone." } %>
+    </div>
   </div>
-</div>
+<% end %>
