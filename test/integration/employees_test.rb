@@ -374,6 +374,20 @@ class EmployeesTest < ActionDispatch::IntegrationTest
     assert_equal 105000.00, employees(:john_doe).reload.salary.to_f
   end
 
+  test "salary update via turbo stream returns stream response and includes flash notice" do
+    sign_in_as users(:hr_manager)
+
+    assert_difference "SalaryHistory.count", 1 do
+      patch salary_employee_url(employees(:john_doe)),
+            params: { employee: { salary: "105000.00", currency: "USD" } },
+            headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :ok
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+    assert_match "Salary was successfully updated", response.body
+  end
+
   test "re-renders with 422 on an invalid salary and does not record history" do
     sign_in_as users(:hr_manager)
 
