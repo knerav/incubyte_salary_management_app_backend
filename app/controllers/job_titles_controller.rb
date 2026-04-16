@@ -36,11 +36,18 @@ class JobTitlesController < ApplicationController
   def destroy
     @job_title.destroy
 
-    if @job_title.destroyed?
-      redirect_to job_titles_path, notice: "Job title was successfully deleted."
-    else
-      @job_titles = JobTitle.order(:name)
-      render :index, status: :unprocessable_content
+    respond_to do |format|
+      if @job_title.destroyed?
+        format.turbo_stream
+        format.html { redirect_to job_titles_path, notice: "Job title was successfully deleted." }
+      else
+        format.turbo_stream {
+          render turbo_stream: turbo_stream.update("flash",
+            partial: "shared/alert",
+            locals: { message: @job_title.errors.full_messages.to_sentence })
+        }
+        format.html { redirect_to job_titles_path, alert: @job_title.errors.full_messages.to_sentence }
+      end
     end
   end
 

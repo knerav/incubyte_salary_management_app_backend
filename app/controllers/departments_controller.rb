@@ -36,11 +36,18 @@ class DepartmentsController < ApplicationController
   def destroy
     @department.destroy
 
-    if @department.destroyed?
-      redirect_to departments_path, notice: "Department was successfully deleted."
-    else
-      @departments = Department.order(:name)
-      render :index, status: :unprocessable_content
+    respond_to do |format|
+      if @department.destroyed?
+        format.turbo_stream
+        format.html { redirect_to departments_path, notice: "Department was successfully deleted." }
+      else
+        format.turbo_stream {
+          render turbo_stream: turbo_stream.update("flash",
+            partial: "shared/alert",
+            locals: { message: @department.errors.full_messages.to_sentence })
+        }
+        format.html { redirect_to departments_path, alert: @department.errors.full_messages.to_sentence }
+      end
     end
   end
 
