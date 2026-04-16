@@ -118,6 +118,34 @@ class EmployeesTest < ActionDispatch::IntegrationTest
     assert_response :ok
   end
 
+  test "new employee form renders a country select dropdown" do
+    sign_in_as users(:hr_manager)
+    get new_employee_url
+    assert_select "select[name='employee[country]']"
+  end
+
+  test "country dropdown is populated with countries from the gem" do
+    sign_in_as users(:hr_manager)
+    get new_employee_url
+    assert_select "select[name='employee[country]'] option[value='US']"
+    assert_select "select[name='employee[country]'] option[value='GB']"
+    assert_select "select[name='employee[country]'] option[value='IN']"
+  end
+
+  test "new employee form renders a currency select dropdown" do
+    sign_in_as users(:hr_manager)
+    get new_employee_url
+    assert_select "select[name='employee[currency]']"
+  end
+
+  test "currency dropdown is populated with currency codes from the gem" do
+    sign_in_as users(:hr_manager)
+    get new_employee_url
+    assert_select "select[name='employee[currency]'] option[value='USD']"
+    assert_select "select[name='employee[currency]'] option[value='GBP']"
+    assert_select "select[name='employee[currency]'] option[value='INR']"
+  end
+
   test "creates an employee with valid params and redirects" do
     sign_in_as users(:hr_manager)
 
