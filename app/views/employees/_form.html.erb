@@ -44,8 +44,18 @@
     </div>
     <div>
       <%= f.label :country, class: "block text-sm font-medium text-neutral-700 mb-1" %>
-      <%= f.text_field :country, maxlength: 2, placeholder: "e.g. US",
-            class: "select-field" %>
+      <%= f.select :country, country_options, { prompt: "Select a country" }, class: "select-field" %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-5">
+    <div>
+      <%= f.label :salary, class: "block text-sm font-medium text-neutral-700 mb-1" %>
+      <%= f.number_field :salary, step: "0.01", min: "0.01", class: "input-field" %>
+    </div>
+    <div>
+      <%= f.label :currency, class: "block text-sm font-medium text-neutral-700 mb-1" %>
+      <%= f.select :currency, currency_options, { prompt: "Select a currency" }, class: "select-field" %>
     </div>
   </div>
 
