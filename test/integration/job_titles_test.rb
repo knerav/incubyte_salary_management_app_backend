@@ -123,6 +123,18 @@ class JobTitlesTest < ActionDispatch::IntegrationTest
     assert_response :ok
   end
 
+  test "deletes a job title via turbo stream and removes the row" do
+    sign_in_as users(:hr_manager)
+
+    assert_difference "JobTitle.count", -1 do
+      delete job_title_url(job_titles(:qa_engineer)),
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :ok
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+  end
+
   test "prevents deletion of a job title that has employees assigned" do
     sign_in_as users(:hr_manager)
 
@@ -130,6 +142,18 @@ class JobTitlesTest < ActionDispatch::IntegrationTest
       delete job_title_url(job_titles(:software_engineer))
     end
 
-    assert_response :unprocessable_content
+    assert_response :redirect
+  end
+
+  test "shows an error via turbo stream when deleting a job title with assigned employees" do
+    sign_in_as users(:hr_manager)
+
+    assert_no_difference "JobTitle.count" do
+      delete job_title_url(job_titles(:software_engineer)),
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :ok
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
   end
 end

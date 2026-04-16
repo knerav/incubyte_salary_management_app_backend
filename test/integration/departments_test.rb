@@ -123,6 +123,18 @@ class DepartmentsTest < ActionDispatch::IntegrationTest
     assert_response :ok
   end
 
+  test "deletes a department via turbo stream and removes the row" do
+    sign_in_as users(:hr_manager)
+
+    assert_difference "Department.count", -1 do
+      delete department_url(departments(:qa)),
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :ok
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
+  end
+
   test "prevents deletion of a department that has employees assigned" do
     sign_in_as users(:hr_manager)
 
@@ -130,6 +142,18 @@ class DepartmentsTest < ActionDispatch::IntegrationTest
       delete department_url(departments(:engineering))
     end
 
-    assert_response :unprocessable_content
+    assert_response :redirect
+  end
+
+  test "shows an error via turbo stream when deleting a department with assigned employees" do
+    sign_in_as users(:hr_manager)
+
+    assert_no_difference "Department.count" do
+      delete department_url(departments(:engineering)),
+        headers: { "Accept" => "text/vnd.turbo-stream.html" }
+    end
+
+    assert_response :ok
+    assert_equal "text/vnd.turbo-stream.html", response.media_type
   end
 end
