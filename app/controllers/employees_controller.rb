@@ -54,7 +54,10 @@ class EmployeesController < ApplicationController
 
   def destroy
     @employee.update_column(:deleted_at, Time.current)
-    redirect_to employees_path, notice: "Employee was successfully deleted."
+    respond_to do |format|
+      format.turbo_stream { flash.now[:notice] = "Employee was successfully deleted." }
+      format.html { redirect_to employees_path, notice: "Employee was successfully deleted." }
+    end
   end
 
   private
