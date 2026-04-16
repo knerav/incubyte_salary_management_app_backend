@@ -22,7 +22,7 @@ class BackfillSalaryHistoriesTaskTest < ActiveSupport::TestCase
       Rake::Task["employees:backfill_salary_histories"].invoke
     end
 
-    history = employee.salary_histories.sole
+    history = employee.salary_histories.reload.sole
     assert_equal employee.salary, history.salary
     assert_equal employee.currency, history.currency
     assert_equal employee.hired_on, history.effective_from
