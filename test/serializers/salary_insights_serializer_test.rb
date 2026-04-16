@@ -52,4 +52,23 @@ class SalaryInsightsSerializerTest < ActiveSupport::TestCase
       assert entry.key?(:avg_salary)
     end
   end
+
+  # — Currency ——————————————————————————————————————————————————————————————
+
+  test "includes currency_code in insights" do
+    assert @result[:insights].key?(:currency_code)
+  end
+
+  test "includes currency_symbol in insights" do
+    assert @result[:insights].key?(:currency_symbol)
+  end
+
+  test "currency_code matches the filtered country" do
+    assert_equal "USD", @result[:insights][:currency_code]
+  end
+
+  test "currency_symbol is a non-empty string" do
+    assert_instance_of String, @result[:insights][:currency_symbol]
+    assert @result[:insights][:currency_symbol].present?
+  end
 end

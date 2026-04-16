@@ -67,4 +67,27 @@ class InsightsTest < ActionDispatch::IntegrationTest
     assert_response :ok
     assert_match "95,000", response.body
   end
+
+  # — Default country ———————————————————————————————————————————————————————
+
+  test "defaults to India (IN) when no country param is given" do
+    sign_in_as users(:hr_manager)
+    get insights_url
+    assert_response :ok
+    assert_select "option[selected]", text: /India/
+  end
+
+  test "shows currency symbol for the selected country" do
+    sign_in_as users(:hr_manager)
+    get insights_url, params: { country: "US" }
+    assert_response :ok
+    assert_match "$", response.body
+  end
+
+  test "shows INR symbol when defaulting to India" do
+    sign_in_as users(:hr_manager)
+    get insights_url
+    assert_response :ok
+    assert_match "₹", response.body
+  end
 end

@@ -15,3 +15,9 @@ jane_smith_initial:
   salary: 75000.00
   currency: INR
   effective_from: 2021-06-01
+
+jane_smith_raise:
+  employee: jane_smith
+  salary: 80000.00
+  currency: INR
+  effective_from: 2022-07-01
