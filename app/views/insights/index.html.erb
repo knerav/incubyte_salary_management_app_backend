@@ -8,19 +8,19 @@
       <%= f.select :country,
             @countries.map { |c| [c.iso_short_name, c.alpha2] },
             { selected: @filters[:country] },
-            class: "rounded-lg border border-neutral-300 px-4 py-2.5 text-sm text-neutral-900 focus:border-amber-600 focus:ring-2 focus:ring-amber-600 focus:outline-none" %>
+            class: "select-field" %>
     </div>
     <div>
       <%= f.label :department_id, "Department", class: "block text-sm font-medium text-neutral-700 mb-1" %>
       <%= f.collection_select :department_id, Department.order(:name), :id, :name,
             { selected: @filters[:department_id], include_blank: "All departments" },
-            class: "rounded-lg border border-neutral-300 px-4 py-2.5 text-sm text-neutral-900 focus:border-amber-600 focus:ring-2 focus:ring-amber-600 focus:outline-none" %>
+            class: "select-field" %>
     </div>
     <div>
       <%= f.label :job_title_id, "Job Title", class: "block text-sm font-medium text-neutral-700 mb-1" %>
       <%= f.collection_select :job_title_id, JobTitle.order(:name), :id, :name,
             { selected: @filters[:job_title_id], include_blank: "All titles" },
-            class: "rounded-lg border border-neutral-300 px-4 py-2.5 text-sm text-neutral-900 focus:border-amber-600 focus:ring-2 focus:ring-amber-600 focus:outline-none" %>
+            class: "select-field" %>
     </div>
     <%= f.submit "Apply", class: "rounded-lg bg-amber-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-amber-600 cursor-pointer transition-colors" %>
   <% end %>
