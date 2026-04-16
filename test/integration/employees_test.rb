@@ -104,6 +104,39 @@ class EmployeesTest < ActionDispatch::IntegrationTest
     assert_select "dialog"
   end
 
+  test "show modal renders a salary history table" do
+    sign_in_as users(:hr_manager)
+    get employee_url(employees(:john_doe)), headers: { "Turbo-Frame" => "modal" }
+    assert_select "table#salary_history"
+  end
+
+  test "salary history table lists every history entry for the employee" do
+    sign_in_as users(:hr_manager)
+    get employee_url(employees(:john_doe)), headers: { "Turbo-Frame" => "modal" }
+    # john_doe has two fixtures entries
+    assert_select "table#salary_history tbody tr", count: 2
+  end
+
+  test "salary history table shows formatted salary and effective date" do
+    sign_in_as users(:hr_manager)
+    get employee_url(employees(:john_doe)), headers: { "Turbo-Frame" => "modal" }
+    assert_match "85,000", response.body
+    assert_match "14 Mar 2022", response.body
+  end
+
+  test "salary history table shows a dash for the first entry percentage change" do
+    sign_in_as users(:hr_manager)
+    get employee_url(employees(:john_doe)), headers: { "Turbo-Frame" => "modal" }
+    assert_select "table#salary_history tbody tr:first-child td", text: "—"
+  end
+
+  test "salary history table shows correct percentage change for subsequent entries" do
+    sign_in_as users(:hr_manager)
+    get employee_url(employees(:john_doe)), headers: { "Turbo-Frame" => "modal" }
+    # 85000 -> 95000 = +11.76%
+    assert_match "+11.76%", response.body
+  end
+
   test "returns 404 for a soft-deleted employee" do
     sign_in_as users(:hr_manager)
     get employee_url(employees(:deleted_employee))
