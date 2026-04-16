@@ -41,10 +41,14 @@ class EmployeesController < ApplicationController
   end
 
   def salary
-    if @employee.update(salary_params)
-      redirect_to employee_path(@employee), notice: "Salary was successfully updated."
-    else
-      render :show, status: :unprocessable_content
+    respond_to do |format|
+      if @employee.update(salary_params)
+        format.turbo_stream { flash.now[:notice] = "Salary was successfully updated." }
+        format.html { redirect_to employee_path(@employee), notice: "Salary was successfully updated." }
+      else
+        format.turbo_stream { render :show, status: :unprocessable_content }
+        format.html { render :show, status: :unprocessable_content }
+      end
     end
   end
 

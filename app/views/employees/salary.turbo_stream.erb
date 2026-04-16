@@ -1,0 +1,6 @@
+<%= turbo_stream.replace :modal do %>
+  <%= turbo_frame_tag :modal %>
+<% end %>
+<%= turbo_stream.update "flash" do %>
+  <%= render "shared/flash" %>
+<% end %>
