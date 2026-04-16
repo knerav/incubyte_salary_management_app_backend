@@ -2,6 +2,7 @@
   <div>
     <p class="text-sm font-medium text-neutral-900">
       <%= link_to employee.full_name, employee_path(employee),
+            data: { turbo_frame: "modal" },
             class: "hover:text-amber-700" %>
     </p>
     <p class="text-xs text-neutral-500"><%= employee.job_title.name %> · <%= employee.department.name %></p>

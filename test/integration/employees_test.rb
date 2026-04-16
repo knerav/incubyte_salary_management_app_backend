@@ -87,6 +87,15 @@ class EmployeesTest < ActionDispatch::IntegrationTest
     assert_response :ok
   end
 
+  test "renders the show modal when requested via turbo frame" do
+    sign_in_as users(:hr_manager)
+    get employee_url(employees(:john_doe)),
+        headers: { "Turbo-Frame" => "modal" }
+    assert_response :ok
+    assert_select "turbo-frame[id='modal']"
+    assert_select "dialog"
+  end
+
   test "returns 404 for a soft-deleted employee" do
     sign_in_as users(:hr_manager)
     get employee_url(employees(:deleted_employee))
