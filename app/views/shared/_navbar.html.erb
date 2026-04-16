@@ -12,10 +12,10 @@
             class: "rounded-lg px-4 py-2 text-sm font-medium transition-colors #{current_page?(root_path) ? 'bg-amber-50 text-amber-700' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'}" %>
       <%= link_to "Employees", employees_path,
             class: "rounded-lg px-4 py-2 text-sm font-medium transition-colors #{current_page?(employees_path) ? 'bg-amber-50 text-amber-700' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'}" %>
-      <%= link_to "Settings", organisation_settings_path,
-            class: "rounded-lg px-4 py-2 text-sm font-medium transition-colors #{current_page?(organisation_settings_path) ? 'bg-amber-50 text-amber-700' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'}" %>
       <%= link_to "Insights", insights_path,
             class: "rounded-lg px-4 py-2 text-sm font-medium transition-colors #{current_page?(insights_path) ? 'bg-amber-50 text-amber-700' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'}" %>
+      <%= link_to "Settings", organisation_settings_path,
+            class: "rounded-lg px-4 py-2 text-sm font-medium transition-colors #{current_page?(organisation_settings_path) ? 'bg-amber-50 text-amber-700' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'}" %>
     </div>
 
     <%# Profile dropdown %>
