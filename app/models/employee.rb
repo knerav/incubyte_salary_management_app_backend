@@ -1,6 +1,14 @@
 class Employee < ApplicationRecord
   EMPLOYMENT_TYPES = %w[full_time part_time contract].freeze
 
+  def self.ransackable_attributes(_auth_object = nil)
+    %w[first_name last_name]
+  end
+
+  def self.ransackable_associations(_auth_object = nil)
+    []
+  end
+
   belongs_to :job_title
   belongs_to :department
   has_many :salary_histories

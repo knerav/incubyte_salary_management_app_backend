@@ -2,7 +2,8 @@ class EmployeesController < ApplicationController
   before_action :set_employee, only: %i[show edit update salary destroy]
 
   def index
-    @pagy, @employees = pagy(:offset, Employee.includes(:job_title, :department).order(:last_name, :first_name))
+    @q = Employee.ransack(params[:q])
+    @pagy, @employees = pagy(:offset, @q.result.includes(:job_title, :department).order(:last_name, :first_name))
   end
 
   def show; end
