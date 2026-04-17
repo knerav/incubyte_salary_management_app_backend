@@ -29,7 +29,9 @@ incubyte-salary-management/
 │   │       └── v1/
 │   │           ├── base_controller.rb   ← current_user guard, render helpers
 │   │           ├── employees_controller.rb  ← JSON CRUD + salary action
-│   │           ├── countries_controller.rb  ← index (active employees only)
+│   │           ├── job_titles_controller.rb  ← full CRUD
+│   │           ├── departments_controller.rb ← full CRUD
+│   │           ├── countries_controller.rb   ← index (active employees only)
 │   │           ├── auth/
 │   │           │   ├── sessions_controller.rb   ← returns refresh token in body on sign-in
 │   │           │   ├── registrations_controller.rb
@@ -227,8 +229,8 @@ namespace :api do
       end
     end
 
-    resources :job_titles,   only: [:index]
-    resources :departments,  only: [:index]
+    resources :job_titles
+    resources :departments
     resources :countries,    only: [:index]
 
     namespace :insights do

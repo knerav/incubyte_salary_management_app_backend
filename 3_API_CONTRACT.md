@@ -343,6 +343,60 @@ GET /api/v1/job_titles
 
 ---
 
+### Create job title
+
+```
+POST /api/v1/job_titles
+```
+
+**Request body:**
+
+```json
+{ "job_title": { "name": "Staff Engineer" } }
+```
+
+**Response `201`:** `{ "id": 3, "name": "Staff Engineer" }`
+
+**Response `422`:** `{ "errors": { "name": ["has already been taken"] } }`
+
+---
+
+### Update job title
+
+```
+PATCH /api/v1/job_titles/:id
+```
+
+**Request body:**
+
+```json
+{ "job_title": { "name": "Principal Engineer" } }
+```
+
+**Response `200`:** `{ "id": 3, "name": "Principal Engineer" }`
+
+**Response `404`:** `{ "error": "Not found" }`
+
+**Response `422`:** Validation errors (same shape as Create).
+
+---
+
+### Delete job title
+
+```
+DELETE /api/v1/job_titles/:id
+```
+
+Deletion is blocked if any active employees are assigned to this job title.
+
+**Response `204`:** No content.
+
+**Response `404`:** `{ "error": "Not found" }`
+
+**Response `422`:** `{ "errors": { "base": ["Cannot delete job title with assigned employees"] } }`
+
+---
+
 ### List departments
 
 ```
@@ -359,6 +413,60 @@ GET /api/v1/departments
   ]
 }
 ```
+
+---
+
+### Create department
+
+```
+POST /api/v1/departments
+```
+
+**Request body:**
+
+```json
+{ "department": { "name": "Design" } }
+```
+
+**Response `201`:** `{ "id": 3, "name": "Design" }`
+
+**Response `422`:** `{ "errors": { "name": ["has already been taken"] } }`
+
+---
+
+### Update department
+
+```
+PATCH /api/v1/departments/:id
+```
+
+**Request body:**
+
+```json
+{ "department": { "name": "Product Design" } }
+```
+
+**Response `200`:** `{ "id": 3, "name": "Product Design" }`
+
+**Response `404`:** `{ "error": "Not found" }`
+
+**Response `422`:** Validation errors (same shape as Create).
+
+---
+
+### Delete department
+
+```
+DELETE /api/v1/departments/:id
+```
+
+Deletion is blocked if any active employees are assigned to this department.
+
+**Response `204`:** No content.
+
+**Response `404`:** `{ "error": "Not found" }`
+
+**Response `422`:** `{ "errors": { "base": ["Cannot delete department with assigned employees"] } }`
 
 ---
 
