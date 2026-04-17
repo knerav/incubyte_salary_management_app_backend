@@ -362,6 +362,29 @@ GET /api/v1/departments
 
 ---
 
+### List countries
+
+```
+GET /api/v1/countries
+```
+
+Returns only countries that have at least one active employee — not the full ISO list. Use this to populate the country filter dropdown on the insights and employee list pages.
+
+**Response `200`:**
+
+```json
+{
+  "countries": [
+    { "code": "GB", "name": "United Kingdom" },
+    { "code": "US", "name": "United States" }
+  ]
+}
+```
+
+`code` is the ISO 3166-1 alpha-2 country code (the value to send as the `country` query parameter). `name` is the full display name, sorted alphabetically.
+
+---
+
 ## Insights
 
 ### Current salary insights
@@ -393,6 +416,8 @@ Filters are additive — multiple parameters narrow the result set.
     "min_salary": "60000.00",
     "max_salary": "210000.00",
     "avg_salary": "118500.00",
+    "currency_code": "USD",
+    "currency_symbol": "$",
     "breakdowns": [
       { "job_title": "Staff Engineer", "avg_salary": "175000.00" },
       { "job_title": "Senior Engineer", "avg_salary": "140000.00" }
@@ -400,4 +425,6 @@ Filters are additive — multiple parameters narrow the result set.
   }
 }
 ```
+
+`currency_code` and `currency_symbol` are derived from the `country` filter (defaulting to `GB`/`GBP` when no country is selected). The frontend can use these directly to format salary values without its own currency lookup.
 
