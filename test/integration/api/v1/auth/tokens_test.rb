@@ -4,64 +4,128 @@ module Api
   module V1
     module Auth
       class TokensTest < ActionDispatch::IntegrationTest
-        # — Authentication guard —————————————————————————————————————————————
+        # — Guard ————————————————————————————————————————————————————————————
 
-        test "returns 401 without a token" do
+        test "returns 401 without a refresh token cookie" do
           post "/api/v1/users/refresh", as: :json
           assert_response :unauthorized
         end
 
-        test "returns 401 with an invalid token" do
+        test "returns 401 with an unrecognised refresh token" do
           post "/api/v1/users/refresh",
-            headers: { Authorization: "Bearer not.a.real.token" },
+            headers: { Cookie: "refresh_token=not-a-real-token" },
+            as: :json
+          assert_response :unauthorized
+        end
+
+        test "returns 401 with an expired refresh token" do
+          api_sign_in(users(:hr_manager))
+          raw_cookie = cookies[:refresh_token]
+          RefreshToken.last.update_columns(expires_at: 1.day.ago)
+
+          post "/api/v1/users/refresh",
+            headers: { Cookie: "refresh_token=#{raw_cookie}" },
             as: :json
           assert_response :unauthorized
         end
 
         # — Happy path ———————————————————————————————————————————————————————
 
-        test "returns 200 with a valid token" do
-          token = api_sign_in(users(:hr_manager))
-          post "/api/v1/users/refresh", headers: { Authorization: token }, as: :json
-          assert_response :ok
-        end
+        test "returns 200 with a valid refresh token cookie" do
+          api_sign_in(users(:hr_manager))
 
-        test "returns a new JWT in the Authorization response header" do
-          old_token = api_sign_in(users(:hr_manager))
-          post "/api/v1/users/refresh", headers: { Authorization: old_token }, as: :json
-          new_token = response.headers["Authorization"]
-          assert_not_nil new_token
-          assert new_token.start_with?("Bearer ")
-          assert_not_equal old_token, new_token
+          post "/api/v1/users/refresh",
+            headers: { Cookie: "refresh_token=#{cookies[:refresh_token]}" },
+            as: :json
+          assert_response :ok
         end
 
         test "response body confirms the token was refreshed" do
-          token = api_sign_in(users(:hr_manager))
-          post "/api/v1/users/refresh", headers: { Authorization: token }, as: :json
+          api_sign_in(users(:hr_manager))
+
+          post "/api/v1/users/refresh",
+            headers: { Cookie: "refresh_token=#{cookies[:refresh_token]}" },
+            as: :json
           assert_equal "Token refreshed successfully.", response.parsed_body["message"]
         end
 
-        test "new token grants access to protected endpoints" do
-          old_token = api_sign_in(users(:hr_manager))
-          post "/api/v1/users/refresh", headers: { Authorization: old_token }, as: :json
-          new_token = response.headers["Authorization"]
+        test "returns a new JWT in the Authorization response header" do
+          old_jwt = api_sign_in(users(:hr_manager))
 
-          get api_v1_employees_url, headers: { Authorization: new_token }, as: :json
+          post "/api/v1/users/refresh",
+            headers: { Cookie: "refresh_token=#{cookies[:refresh_token]}" },
+            as: :json
+
+          new_jwt = response.headers["Authorization"]
+          assert_not_nil new_jwt
+          assert new_jwt.start_with?("Bearer ")
+          assert_not_equal old_jwt, new_jwt
+        end
+
+        test "new JWT grants access to protected endpoints" do
+          api_sign_in(users(:hr_manager))
+
+          post "/api/v1/users/refresh",
+            headers: { Cookie: "refresh_token=#{cookies[:refresh_token]}" },
+            as: :json
+
+          get api_v1_employees_url,
+            headers: { Authorization: response.headers["Authorization"] },
+            as: :json
           assert_response :ok
         end
 
-        # — Token rotation ———————————————————————————————————————————————————
+        test "sets a new refresh_token cookie" do
+          api_sign_in(users(:hr_manager))
+          old_cookie = cookies[:refresh_token]
 
-        test "old token is revoked after refresh" do
-          old_token = api_sign_in(users(:hr_manager))
-          post "/api/v1/users/refresh", headers: { Authorization: old_token }, as: :json
+          post "/api/v1/users/refresh",
+            headers: { Cookie: "refresh_token=#{old_cookie}" },
+            as: :json
 
-          # reset! clears the Warden session cookie so the next request authenticates
-          # via JWT alone — the same conditions a real API client faces.
-          reset!
+          assert_not_nil cookies[:refresh_token]
+          assert_not_equal old_cookie, cookies[:refresh_token]
+        end
 
-          get api_v1_employees_url, headers: { Authorization: old_token }, as: :json
+        test "new cookie is HttpOnly and scoped to the refresh path" do
+          api_sign_in(users(:hr_manager))
+
+          post "/api/v1/users/refresh",
+            headers: { Cookie: "refresh_token=#{cookies[:refresh_token]}" },
+            as: :json
+
+          set_cookie = response.headers["Set-Cookie"]
+          assert_match(/HttpOnly/i, set_cookie)
+          assert_match(%r{path=/api/v1/users/refresh}i, set_cookie)
+        end
+
+        # — Rotation —————————————————————————————————————————————————————————
+
+        test "old refresh token is invalidated after use" do
+          api_sign_in(users(:hr_manager))
+          old_cookie = cookies[:refresh_token]
+
+          post "/api/v1/users/refresh",
+            headers: { Cookie: "refresh_token=#{old_cookie}" },
+            as: :json
+
+          post "/api/v1/users/refresh",
+            headers: { Cookie: "refresh_token=#{old_cookie}" },
+            as: :json
           assert_response :unauthorized
+        end
+
+        test "refresh replaces the RefreshToken record" do
+          api_sign_in(users(:hr_manager))
+          old_id = RefreshToken.last.id
+
+          post "/api/v1/users/refresh",
+            headers: { Cookie: "refresh_token=#{cookies[:refresh_token]}" },
+            as: :json
+
+          assert_nil RefreshToken.find_by(id: old_id)
+          assert_not_nil RefreshToken.last
+          assert_not_equal old_id, RefreshToken.last.id
         end
       end
     end
