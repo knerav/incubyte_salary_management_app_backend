@@ -38,8 +38,8 @@ Rails.application.routes.draw do
         end
       end
 
-      resources :job_titles, only: [ :index ]
-      resources :departments, only: [ :index ]
+      resources :job_titles
+      resources :departments
       resources :countries, only: [ :index ]
 
       namespace :insights do
