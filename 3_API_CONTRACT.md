@@ -426,5 +426,5 @@ Filters are additive — multiple parameters narrow the result set.
 }
 ```
 
-`currency_code` and `currency_symbol` are derived from the `country` filter (defaulting to `GB`/`GBP` when no country is selected). The frontend can use these directly to format salary values without its own currency lookup.
+`currency_code` and `currency_symbol` are derived from the `country` filter (defaulting to `IN`/`INR`/`₹` when no country is selected). The frontend can use these directly to format salary values without its own currency lookup.
 
