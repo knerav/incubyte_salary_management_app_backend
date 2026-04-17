@@ -255,6 +255,41 @@ Employees are soft deleted by setting `deleted_at`, retaining the record for his
 
 ---
 
+### Get salary history
+
+```
+GET /api/v1/employees/:id/salary_history
+```
+
+Returns the full salary history for an individual employee, ordered chronologically. This is a separate endpoint rather than a nested field on the employee object — the employee list and show views don't need history, so separating it avoids loading it on every request.
+
+**Response `200`:**
+
+```json
+{
+  "salary_history": [
+    {
+      "effective_from": "2022-03-14",
+      "salary": "95000.00",
+      "currency": "USD",
+      "change": null
+    },
+    {
+      "effective_from": "2023-01-01",
+      "salary": "105000.00",
+      "currency": "USD",
+      "change": "+10.53%"
+    }
+  ]
+}
+```
+
+`change` is the percentage change from the preceding entry. The first entry is always `null`.
+
+**Response `404`:** Employee not found.
+
+---
+
 ## Reference data
 
 ### List job titles
@@ -334,40 +369,3 @@ Filters are additive — multiple parameters narrow the result set.
 }
 ```
 
----
-
-### Historical salary insights
-
-```
-GET /api/v1/insights/salary/history
-```
-
-This endpoint is backed by `salary_histories` and supports the same filter dimensions as current insights, with an additional date range and grouping period for time-series visualisation.
-
-**Query parameters:**
-
-| Parameter    | Type   | Description                                           |
-| ------------ | ------ | ----------------------------------------------------- |
-| `country`       | string  | Filter by country                                     |
-| `department_id` | integer | Filter by department                                  |
-| `job_title_id`  | integer | Filter by job title                                   |
-| `from`          | date    | Start of date range, default 12 months ago            |
-| `to`            | date    | End of date range, default today                      |
-| `group_by`      | string  | Grouping period: `month` (default), `quarter`, `year` |
-
-**Response `200`:**
-
-```json
-{
-  "filters": {
-    "country": "US",
-    "department": "Engineering"
-  },
-  "group_by": "month",
-  "series": [
-    { "period": "2024-01", "avg_salary": "115000.00", "employee_count": 418 },
-    { "period": "2024-02", "avg_salary": "116200.00", "employee_count": 421 },
-    { "period": "2024-03", "avg_salary": "117800.00", "employee_count": 428 }
-  ]
-}
-```

@@ -52,12 +52,11 @@ incubyte-salary-management/
 │   │                                       stores SHA-256 digest, never the raw token
 │   ├── serializers/
 │   │   ├── employee_serializer.rb
-│   │   ├── salary_insights_serializer.rb
-│   │   └── historical_salary_serializer.rb
+│   │   ├── salary_history_serializer.rb  ← per-employee history with change percentages
+│   │   └── salary_insights_serializer.rb
 │   ├── services/
 │   │   ├── employee_filter_service.rb
-│   │   ├── salary_insights_service.rb
-│   │   └── historical_salary_service.rb
+│   │   └── salary_insights_service.rb
 │   └── views/
 │       ├── layouts/
 │       │   ├── application.html.erb     ← Main app layout (authenticated pages)
@@ -146,12 +145,11 @@ incubyte-salary-management/
 │   │               └── tokens_test.rb  ← refresh token flow
 │   ├── services/
 │   │   ├── employee_filter_service_test.rb
-│   │   ├── salary_insights_service_test.rb
-│   │   └── historical_salary_service_test.rb
+│   │   └── salary_insights_service_test.rb
 │   ├── serializers/
 │   │   ├── employee_serializer_test.rb
-│   │   ├── salary_insights_serializer_test.rb
-│   │   └── historical_salary_serializer_test.rb
+│   │   ├── salary_history_serializer_test.rb
+│   │   └── salary_insights_serializer_test.rb
 │   ├── tasks/
 │   │   └── backfill_salary_histories_test.rb
 │   ├── system/                          ← placeholder; no system tests at this stage
@@ -222,16 +220,17 @@ namespace :api do
     end
 
     resources :employees do
-      member { patch :salary }
+      member do
+        patch :salary
+        get   :salary_history
+      end
     end
 
     resources :job_titles,   only: [:index]
     resources :departments,  only: [:index]
 
     namespace :insights do
-      resources :salary, only: [:index] do
-        get :history, on: :collection
-      end
+      resources :salary, only: [:index]
     end
   end
 end
