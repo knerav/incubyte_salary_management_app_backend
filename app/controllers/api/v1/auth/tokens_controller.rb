@@ -1,9 +1,6 @@
 class Api::V1::Auth::TokensController < ActionController::API
-  include ActionController::Cookies
-  include RefreshTokenCookie
-
   def create
-    raw = cookies[:refresh_token]
+    raw = params.dig(:auth, :refresh_token)
     record = raw && RefreshToken.find_active_by_token(raw)
 
     unless record
@@ -19,8 +16,6 @@ class Api::V1::Auth::TokensController < ActionController::API
     token, _payload = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil)
 
     response.set_header("Authorization", "Bearer #{token}")
-    set_refresh_token_cookie(new_raw)
-
-    render json: { message: "Token refreshed successfully." }, status: :ok
+    render json: { message: "Token refreshed successfully.", auth: { refresh_token: new_raw } }, status: :ok
   end
 end
