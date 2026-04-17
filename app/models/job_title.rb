@@ -8,7 +8,7 @@ class JobTitle < ApplicationRecord
   private
 
   def prevent_destroy_with_employees
-    return unless employees.exists?
+    return unless Employee.unscoped.where(job_title_id: id).exists?
 
     errors.add(:base, "Cannot delete job title with assigned employees")
     throw :abort

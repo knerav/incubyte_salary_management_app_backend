@@ -8,7 +8,7 @@ class Department < ApplicationRecord
   private
 
   def prevent_destroy_with_employees
-    return unless employees.exists?
+    return unless Employee.unscoped.where(department_id: id).exists?
 
     errors.add(:base, "Cannot delete department with assigned employees")
     throw :abort
