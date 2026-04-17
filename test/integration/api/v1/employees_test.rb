@@ -190,6 +190,69 @@ module Api
     delete api_v1_employee_url(employees(:deleted_employee)), headers: { Authorization: token }, as: :json
     assert_response :not_found
   end
+
+  # — Salary history ————————————————————————————————————————————————————————
+
+  test "returns 401 on salary history without a JWT token" do
+    get salary_history_api_v1_employee_url(employees(:john_doe)), as: :json
+    assert_response :unauthorized
+  end
+
+  test "returns salary history for an employee" do
+    token = api_sign_in(users(:hr_manager))
+    get salary_history_api_v1_employee_url(employees(:john_doe)),
+      headers: { Authorization: token }, as: :json
+    assert_response :ok
+  end
+
+  test "salary history response includes a salary_history array" do
+    token = api_sign_in(users(:hr_manager))
+    get salary_history_api_v1_employee_url(employees(:john_doe)),
+      headers: { Authorization: token }, as: :json
+    assert response.parsed_body.key?("salary_history")
+    assert_instance_of Array, response.parsed_body["salary_history"]
+  end
+
+  test "each salary history entry includes effective_from, salary, currency, and change" do
+    token = api_sign_in(users(:hr_manager))
+    get salary_history_api_v1_employee_url(employees(:john_doe)),
+      headers: { Authorization: token }, as: :json
+    entry = response.parsed_body["salary_history"].first
+    %w[effective_from salary currency change].each do |field|
+      assert entry.key?(field), "expected entry to include #{field}"
+    end
+  end
+
+  test "salary history entries are ordered chronologically" do
+    token = api_sign_in(users(:hr_manager))
+    get salary_history_api_v1_employee_url(employees(:john_doe)),
+      headers: { Authorization: token }, as: :json
+    dates = response.parsed_body["salary_history"].map { |e| e["effective_from"] }
+    assert_equal dates.sort, dates
+  end
+
+  test "first salary history entry has a null change" do
+    token = api_sign_in(users(:hr_manager))
+    get salary_history_api_v1_employee_url(employees(:john_doe)),
+      headers: { Authorization: token }, as: :json
+    assert_nil response.parsed_body["salary_history"].first["change"]
+  end
+
+  test "subsequent salary history entries include a change percentage" do
+    token = api_sign_in(users(:hr_manager))
+    get salary_history_api_v1_employee_url(employees(:john_doe)),
+      headers: { Authorization: token }, as: :json
+    change = response.parsed_body["salary_history"].last["change"]
+    assert_not_nil change
+    assert_match(/\A[+-]\d+\.\d+%\z/, change)
+  end
+
+  test "returns 404 for salary history of a soft-deleted employee" do
+    token = api_sign_in(users(:hr_manager))
+    get salary_history_api_v1_employee_url(employees(:deleted_employee)),
+      headers: { Authorization: token }, as: :json
+    assert_response :not_found
+  end
     end
   end
 end
