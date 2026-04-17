@@ -4,6 +4,13 @@ module Api
   module V1
     module Auth
       class SessionsTest < ActionDispatch::IntegrationTest
+        private
+
+        def refresh_token_set_cookie
+          Array(response.headers["Set-Cookie"]).find { |c| c.start_with?("refresh_token=") }
+        end
+
+        public
         # — Sign in ——————————————————————————————————————————————————————————
 
         test "sign in sets a refresh_token cookie" do
@@ -27,7 +34,8 @@ module Api
             params: { user: { email: users(:hr_manager).email, password: "Password1!" } },
             as: :json
 
-          assert_match(/HttpOnly/i, response.headers["Set-Cookie"])
+          cookie = refresh_token_set_cookie
+          assert_match(/HttpOnly/i, cookie)
         end
 
         test "sign in cookie is scoped to the refresh path" do
@@ -35,7 +43,7 @@ module Api
             params: { user: { email: users(:hr_manager).email, password: "Password1!" } },
             as: :json
 
-          assert_match(%r{path=/api/v1/users/refresh}i, response.headers["Set-Cookie"])
+          assert_match(%r{path=/api/v1/users/refresh}i, refresh_token_set_cookie)
         end
 
         test "sign in cookie expires in 7 days" do
@@ -43,7 +51,7 @@ module Api
             params: { user: { email: users(:hr_manager).email, password: "Password1!" } },
             as: :json
 
-          assert_match(/max-age=604800/i, response.headers["Set-Cookie"])
+          assert_match(/max-age=604800/i, refresh_token_set_cookie)
         end
 
         test "failed sign in does not set a refresh_token cookie" do

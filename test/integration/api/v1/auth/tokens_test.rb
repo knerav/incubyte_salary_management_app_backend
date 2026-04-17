@@ -4,6 +4,13 @@ module Api
   module V1
     module Auth
       class TokensTest < ActionDispatch::IntegrationTest
+        private
+
+        def refresh_token_set_cookie
+          Array(response.headers["Set-Cookie"]).find { |c| c.start_with?("refresh_token=") }
+        end
+
+        public
         # — Guard ————————————————————————————————————————————————————————————
 
         test "returns 401 without a refresh token cookie" do
@@ -94,9 +101,9 @@ module Api
             headers: { Cookie: "refresh_token=#{cookies[:refresh_token]}" },
             as: :json
 
-          set_cookie = response.headers["Set-Cookie"]
-          assert_match(/HttpOnly/i, set_cookie)
-          assert_match(%r{path=/api/v1/users/refresh}i, set_cookie)
+          cookie = refresh_token_set_cookie
+          assert_match(/HttpOnly/i, cookie)
+          assert_match(%r{path=/api/v1/users/refresh}i, cookie)
         end
 
         # — Rotation —————————————————————————————————————————————————————————
