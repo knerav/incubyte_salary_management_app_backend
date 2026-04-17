@@ -387,7 +387,7 @@ PATCH /api/v1/job_titles/:id
 DELETE /api/v1/job_titles/:id
 ```
 
-Deletion is blocked if any active employees are assigned to this job title.
+Deletion is blocked if any employees (including soft-deleted) are assigned to this job title. Soft-deleted employees still hold the foreign key and would have a dangling reference if restored after the job title was deleted.
 
 **Response `204`:** No content.
 
@@ -460,7 +460,7 @@ PATCH /api/v1/departments/:id
 DELETE /api/v1/departments/:id
 ```
 
-Deletion is blocked if any active employees are assigned to this department.
+Deletion is blocked if any employees (including soft-deleted) are assigned to this department. Soft-deleted employees still hold the foreign key and would have a dangling reference if restored after the department was deleted.
 
 **Response `204`:** No content.
 

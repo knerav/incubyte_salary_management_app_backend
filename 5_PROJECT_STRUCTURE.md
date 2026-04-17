@@ -42,6 +42,7 @@ incubyte-salary-management/
 │   │   └── application_helper.rb        ← country_options, currency_options,
 │   │                                       salary_change_percentage
 │   ├── lib/
+│   │   ├── api_failure_app.rb           ← Warden failure app — returns JSON 401 for /api/ paths
 │   │   └── currency_lookup.rb           ← ISO 3166 currency code/symbol helpers
 │   ├── models/
 │   │   ├── user.rb                      ← Devise, JTIMatcher, trackable
@@ -142,10 +143,14 @@ incubyte-salary-management/
 │   │   └── api/
 │   │       └── v1/
 │   │           ├── employees_test.rb
+│   │           ├── job_titles_test.rb
+│   │           ├── departments_test.rb
+│   │           ├── countries_test.rb
 │   │           ├── insights/
 │   │           │   └── salary_test.rb
 │   │           └── auth/
-│   │               └── tokens_test.rb  ← refresh token flow
+│   │               ├── sessions_test.rb ← sign-in/sign-out, refresh token in body
+│   │               └── tokens_test.rb   ← refresh token rotation flow
 │   ├── services/
 │   │   ├── employee_filter_service_test.rb
 │   │   └── salary_insights_service_test.rb
@@ -177,19 +182,22 @@ ApplicationController                 (authenticate_user!, after_sign_out_path_f
 ├── DepartmentsController             (Hotwire — full CRUD)
 ├── EmployeesController               (Hotwire — full CRUD + salary action)
 ├── InsightsController                (Hotwire — filter + SQL aggregations)
-└── Api::V1::BaseController           (JWT strategy — authenticate_user!, render helpers)
+└── Api::V1::BaseController           (current_user guard, render helpers)
     ├── Api::V1::Auth::SessionsController
     ├── Api::V1::Auth::RegistrationsController
     ├── Api::V1::EmployeesController
+    ├── Api::V1::JobTitlesController
+    ├── Api::V1::DepartmentsController
+    ├── Api::V1::CountriesController
     └── Api::V1::Insights::SalaryController
 
-ActionController::API                 (no authenticate_user! — auth via refresh token cookie)
+ActionController::API                 (no authentication — auth via refresh token in request body)
 └── Api::V1::Auth::TokensController   (POST /api/v1/users/refresh)
 ```
 
-`authenticate_user!` lives in `ApplicationController` and protects all Hotwire pages. Devise controllers are exempted automatically. `Api::V1::BaseController` inherits the same guard and applies it via the JWT strategy for the JSON API. The API uses `devise_scope :user` to route auth endpoints through the existing `:user` Warden scope, keeping JWT dispatch, revocation, and `authenticate_user!` all aligned.
+`authenticate_user!` lives in `ApplicationController` and protects all Hotwire pages. Devise controllers are exempted automatically. `Api::V1::BaseController` uses `current_user` (non-throwing) to guard API endpoints — this avoids Warden's failure app, which would redirect to the HTML sign-in page rather than returning a JSON 401. The API uses `devise_scope :user` to route auth endpoints through the existing `:user` Warden scope, keeping JWT dispatch, revocation, and authentication all aligned.
 
-`Api::V1::Auth::TokensController` sits outside `BaseController` intentionally — the refresh endpoint authenticates via the `HttpOnly` refresh token cookie, not a JWT. Inheriting `BaseController` would require a valid JWT, defeating the purpose of the endpoint.
+`Api::V1::Auth::TokensController` sits outside `BaseController` intentionally — the refresh endpoint authenticates via the refresh token in the request body, not a JWT. Inheriting `BaseController` would require a valid JWT, defeating the purpose of the endpoint.
 
 The Devise `users/sessions`, `users/registrations`, and `users/passwords` controller overrides were originally planned to handle Turbo form responses. Devise 5.0 resolved this natively via the `responders` gem — those overrides are no longer needed and have been omitted.
 
