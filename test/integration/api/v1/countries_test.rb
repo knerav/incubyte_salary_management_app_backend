@@ -3,12 +3,9 @@ require "test_helper"
 module Api
   module V1
     class CountriesTest < ActionDispatch::IntegrationTest
-      setup do
-        @token = api_sign_in(users(:hr_manager))
-      end
-
       test "returns 200" do
-        get api_v1_countries_url, headers: { Authorization: @token }, as: :json
+        token = api_sign_in(users(:hr_manager))
+        get api_v1_countries_url, headers: { Authorization: token }, as: :json
         assert_response :ok
       end
 
@@ -18,12 +15,14 @@ module Api
       end
 
       test "response contains a countries array" do
-        get api_v1_countries_url, headers: { Authorization: @token }, as: :json
+        token = api_sign_in(users(:hr_manager))
+        get api_v1_countries_url, headers: { Authorization: token }, as: :json
         assert response.parsed_body.key?("countries")
       end
 
       test "each entry has a code and name" do
-        get api_v1_countries_url, headers: { Authorization: @token }, as: :json
+        token = api_sign_in(users(:hr_manager))
+        get api_v1_countries_url, headers: { Authorization: token }, as: :json
         country = response.parsed_body["countries"].first
         assert country.key?("code")
         assert country.key?("name")
@@ -31,7 +30,8 @@ module Api
 
       test "only returns countries with active employees" do
         # Fixtures: john_doe (US), jane_smith (IN), deleted_employee (GB - soft deleted)
-        get api_v1_countries_url, headers: { Authorization: @token }, as: :json
+        token = api_sign_in(users(:hr_manager))
+        get api_v1_countries_url, headers: { Authorization: token }, as: :json
         codes = response.parsed_body["countries"].map { |c| c["code"] }
         assert_includes codes, "US"
         assert_includes codes, "IN"
@@ -39,7 +39,8 @@ module Api
       end
 
       test "countries are sorted alphabetically by name" do
-        get api_v1_countries_url, headers: { Authorization: @token }, as: :json
+        token = api_sign_in(users(:hr_manager))
+        get api_v1_countries_url, headers: { Authorization: token }, as: :json
         names = response.parsed_body["countries"].map { |c| c["name"] }
         assert_equal names.sort, names
       end
