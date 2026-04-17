@@ -55,6 +55,14 @@ The `effective_from` date defaults to today — it is derived automatically from
 
 ---
 
+## Separate endpoint for individual salary history
+
+An employee's salary history is exposed at `GET /api/v1/employees/:id/salary_history` rather than embedded as a nested array in the show response. The employee list (`GET /api/v1/employees`) and show (`GET /api/v1/employees/:id`) endpoints are hit frequently — every page load, every profile view. Bundling salary history into the show response would load and serialise that data on every one of those requests, even when it is not needed.
+
+Keeping it on its own endpoint means salary history is only fetched when the user explicitly opens the history view, which is the less common path. At 10,000 employees, each with a growing number of salary history entries, this separation keeps the common read paths fast.
+
+---
+
 ## `salary_histories` as an append-only log
 
 The `employees` table only holds the current salary. To support time-series insights — average salary over time by country, department, or job title — I added a `salary_histories` table that records each salary change as an immutable row, written once and never updated.
