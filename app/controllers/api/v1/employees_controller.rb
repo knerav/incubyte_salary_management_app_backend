@@ -1,5 +1,5 @@
 class Api::V1::EmployeesController < Api::V1::BaseController
-  before_action :set_employee, only: %i[show update salary destroy]
+  before_action :set_employee, only: %i[show update salary salary_history destroy]
 
   def index
     scope      = EmployeeFilterService.new(filter_params).call
@@ -50,6 +50,11 @@ class Api::V1::EmployeesController < Api::V1::BaseController
     else
       render_errors(@employee)
     end
+  end
+
+  def salary_history
+    histories = @employee.salary_histories.order(:effective_from)
+    render json: SalaryHistorySerializer.new(histories).as_json
   end
 
   def destroy

@@ -32,16 +32,17 @@ Rails.application.routes.draw do
       end
 
       resources :employees do
-        member { patch :salary }
+        member do
+          patch :salary
+          get   :salary_history
+        end
       end
 
       resources :job_titles, only: [ :index ]
       resources :departments, only: [ :index ]
 
       namespace :insights do
-        resources :salary, only: [ :index ] do
-          get :history, on: :collection
-        end
+        resources :salary, only: [ :index ]
       end
     end
   end

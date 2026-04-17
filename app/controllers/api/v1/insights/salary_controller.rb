@@ -5,16 +5,6 @@ class Api::V1::Insights::SalaryController < Api::V1::BaseController
     render json: SalaryInsightsSerializer.new(insights, filter_params).as_json
   end
 
-  def history
-    result = HistoricalSalaryService.new(
-      filter_params,
-      from:     params[:from],
-      to:       params[:to],
-      group_by: params[:group_by] || "month"
-    ).call
-    render json: HistoricalSalarySerializer.new(result, filter_params, group_by: params[:group_by] || "month").as_json
-  end
-
   private
 
   def filter_params
