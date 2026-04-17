@@ -30,8 +30,9 @@ incubyte-salary-management/
 │   │           ├── base_controller.rb   ← authenticate_user!, render helpers
 │   │           ├── employees_controller.rb  ← JSON CRUD + salary action
 │   │           ├── auth/
-│   │           │   ├── sessions_controller.rb
-│   │           │   └── registrations_controller.rb
+│   │           │   ├── sessions_controller.rb   ← sets/clears refresh_token cookie
+│   │           │   ├── registrations_controller.rb
+│   │           │   └── tokens_controller.rb     ← cookie auth, rotation, new JWT
 │   │           └── insights/
 │   │               └── salary_controller.rb  ← index + history
 │   ├── helpers/
@@ -46,7 +47,9 @@ incubyte-salary-management/
 │   │   ├── employee.rb                  ← validations, soft delete scope, full_name,
 │   │   │                                   ransackable_attributes, full_name_cont scope,
 │   │   │                                   salary history callback
-│   │   └── salary_history.rb            ← validations, before_update immutability guard
+│   │   ├── salary_history.rb            ← validations, before_update immutability guard
+│   │   └── refresh_token.rb             ← belongs_to user; generate_for, find_active_by_token;
+│   │                                       stores SHA-256 digest, never the raw token
 │   ├── serializers/
 │   │   ├── employee_serializer.rb
 │   │   ├── salary_insights_serializer.rb
@@ -109,7 +112,8 @@ incubyte-salary-management/
 │   │   ├── 20260413075258_create_employees.rb
 │   │   ├── 20260413104507_create_salary_histories.rb
 │   │   ├── 20260413164738_create_departments.rb
-│   │   └── 20260413164739_add_department_to_employees.rb
+│   │   ├── 20260413164739_add_department_to_employees.rb
+│   │   └── 20260417xxxxxx_create_refresh_tokens.rb
 │   ├── schema.rb
 │   └── seeds.rb                         ← 10 000 employees via upsert_all; idempotent
 ├── lib/
@@ -121,7 +125,8 @@ incubyte-salary-management/
 │   │   ├── job_title_test.rb
 │   │   ├── department_test.rb
 │   │   ├── employee_test.rb
-│   │   └── salary_history_test.rb
+│   │   ├── salary_history_test.rb
+│   │   └── refresh_token_test.rb
 │   ├── integration/
 │   │   ├── organisation_settings_test.rb
 │   │   ├── job_titles_test.rb
@@ -135,8 +140,10 @@ incubyte-salary-management/
 │   │   └── api/
 │   │       └── v1/
 │   │           ├── employees_test.rb
-│   │           └── insights/
-│   │               └── salary_test.rb
+│   │           ├── insights/
+│   │           │   └── salary_test.rb
+│   │           └── auth/
+│   │               └── tokens_test.rb  ← refresh token flow
 │   ├── services/
 │   │   ├── employee_filter_service_test.rb
 │   │   ├── salary_insights_service_test.rb
@@ -174,9 +181,14 @@ ApplicationController                 (authenticate_user!, after_sign_out_path_f
     ├── Api::V1::Auth::RegistrationsController
     ├── Api::V1::EmployeesController
     └── Api::V1::Insights::SalaryController
+
+ActionController::API                 (no authenticate_user! — auth via refresh token cookie)
+└── Api::V1::Auth::TokensController   (POST /api/v1/users/refresh)
 ```
 
 `authenticate_user!` lives in `ApplicationController` and protects all Hotwire pages. Devise controllers are exempted automatically. `Api::V1::BaseController` inherits the same guard and applies it via the JWT strategy for the JSON API. The API uses `devise_scope :user` to route auth endpoints through the existing `:user` Warden scope, keeping JWT dispatch, revocation, and `authenticate_user!` all aligned.
+
+`Api::V1::Auth::TokensController` sits outside `BaseController` intentionally — the refresh endpoint authenticates via the `HttpOnly` refresh token cookie, not a JWT. Inheriting `BaseController` would require a valid JWT, defeating the purpose of the endpoint.
 
 The Devise `users/sessions`, `users/registrations`, and `users/passwords` controller overrides were originally planned to handle Turbo form responses. Devise 5.0 resolved this natively via the `responders` gem — those overrides are no longer needed and have been omitted.
 
@@ -206,6 +218,7 @@ namespace :api do
       post   "users/sign_in",  to: "auth/sessions#create"
       delete "users/sign_out", to: "auth/sessions#destroy"
       post   "users",          to: "auth/registrations#create"
+      post   "users/refresh",  to: "auth/tokens#create"
     end
 
     resources :employees do
