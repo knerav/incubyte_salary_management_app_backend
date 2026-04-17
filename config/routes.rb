@@ -40,6 +40,7 @@ Rails.application.routes.draw do
 
       resources :job_titles, only: [ :index ]
       resources :departments, only: [ :index ]
+      resources :countries, only: [ :index ]
 
       namespace :insights do
         resources :salary, only: [ :index ]
