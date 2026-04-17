@@ -314,6 +314,11 @@ Devise.setup do |config|
   # changed. Defaults to true, so a user is signed in automatically after changing a password.
   # config.sign_in_after_change_password = true
 
+  # Return JSON 401 for API paths instead of redirecting to the sign-in page
+  config.warden do |manager|
+    manager.failure_app = ApiFailureApp
+  end
+
   # ==> JWT configuration
   config.jwt do |jwt|
     jwt.secret = Rails.application.secret_key_base
@@ -323,6 +328,6 @@ Devise.setup do |config|
     jwt.revocation_requests = [
       [ "DELETE", %r{^/api/v1/users/sign_out$} ]
     ]
-    jwt.expiration_time = 30.minutes.to_i
+    jwt.expiration_time = 1.minute.to_i
   end
 end
