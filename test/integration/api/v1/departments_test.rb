@@ -125,12 +125,14 @@ module Api
         assert response.parsed_body.key?("errors")
       end
 
-      test "destroy succeeds when the only assigned employee is soft-deleted" do
+      test "destroy returns 422 when the only assigned employee is soft-deleted" do
+        # Soft-deleted employees still hold the foreign key — deleting the department
+        # would leave a dangling reference if the employee were ever restored.
         token = api_sign_in(users(:hr_manager))
         delete api_v1_department_url(departments(:design)),
           headers: { Authorization: token },
           as: :json
-        assert_response :no_content
+        assert_response :unprocessable_content
       end
     end
   end
