@@ -39,7 +39,7 @@ module CurrencyLookup
     "THB" => "฿",  "TJS" => "SM",  "TMT" => "T",   "TND" => "DT",
     "TOP" => "T$",  "TRY" => "₺",  "TTD" => "TT$", "TWD" => "NT$",
     "TZS" => "TSh", "UAH" => "₴",  "UGX" => "USh", "USD" => "$",
-    "UYU" => "$U",  "UZS" => "лв", "VES" => "Bs.S","VND" => "₫",
+    "UYU" => "$U",  "UZS" => "лв", "VES" => "Bs.S", "VND" => "₫",
     "VUV" => "VT",  "WST" => "WS$", "XAF" => "Fr",  "XCD" => "$",
     "XOF" => "Fr",  "XPF" => "Fr",  "YER" => "﷼",  "ZAR" => "R",
     "ZMW" => "ZK",  "ZWL" => "$"
