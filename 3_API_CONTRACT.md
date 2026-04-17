@@ -28,13 +28,18 @@ POST /api/v1/users/sign_in
 
 **Response `200`:**
 - `Authorization` response header contains the JWT. Tokens expire after 30 minutes.
-- `Set-Cookie` response header sets an `HttpOnly` refresh token cookie:
+- Response body contains the refresh token in an `auth` hash:
 
-```
-Set-Cookie: refresh_token=<token>; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/users/refresh; Max-Age=604800
+```json
+{
+  "message": "Signed in successfully.",
+  "auth": {
+    "refresh_token": "<raw_token>"
+  }
+}
 ```
 
-Scoping the cookie path to `/api/v1/users/refresh` means the browser only ever sends it to that one endpoint — it never leaks to employee or insights requests, and is inaccessible to JavaScript.
+The client is responsible for storing the refresh token and including it in subsequent refresh requests.
 
 ### Refresh token
 
@@ -42,13 +47,32 @@ Scoping the cookie path to `/api/v1/users/refresh` means the browser only ever s
 POST /api/v1/users/refresh
 ```
 
-No `Authorization` header is required. The browser sends the `refresh_token` cookie automatically because the request path matches the cookie's `Path` attribute.
+No `Authorization` header is required. This endpoint does not require a valid JWT — it exists specifically to obtain one after the previous token has expired.
 
-This endpoint does not require a valid JWT — it exists specifically to obtain one after the previous token has expired.
+**Request body:**
+
+```json
+{
+  "auth": {
+    "refresh_token": "<raw_token>"
+  }
+}
+```
 
 **Response `200`:**
 - `Authorization` response header contains a new JWT.
-- `Set-Cookie` rotates the refresh token cookie (old token invalidated, new 7-day token issued).
+- Response body contains the rotated refresh token:
+
+```json
+{
+  "message": "Token refreshed successfully.",
+  "auth": {
+    "refresh_token": "<new_raw_token>"
+  }
+}
+```
+
+The old refresh token is immediately invalidated.
 
 **Response `401`:** Refresh token is missing, not found, or expired. The client should clear local state and redirect to sign-in.
 
@@ -58,11 +82,19 @@ This endpoint does not require a valid JWT — it exists specifically to obtain 
 DELETE /api/v1/users/sign_out
 ```
 
-Revokes the current JWT via the JTIMatcher strategy and deletes the refresh token record. Both tokens are invalidated in a single request.
+Revokes the current JWT via the JTIMatcher strategy. Optionally accepts the refresh token in the request body to invalidate it at the same time — if omitted, the refresh token record is left in place but the JWT is still revoked.
 
-**Response `200`:**
-- `{ "message": "Signed out successfully." }`
-- `Set-Cookie` clears the refresh token cookie: `refresh_token=; Max-Age=0`
+**Request body (optional):**
+
+```json
+{
+  "auth": {
+    "refresh_token": "<raw_token>"
+  }
+}
+```
+
+**Response `200`:** `{ "message": "Signed out successfully." }`
 
 ### Sign up
 

@@ -30,11 +30,11 @@ incubyte-salary-management/
 │   │           ├── base_controller.rb   ← authenticate_user!, render helpers
 │   │           ├── employees_controller.rb  ← JSON CRUD + salary action
 │   │           ├── auth/
-│   │           │   ├── sessions_controller.rb   ← sets/clears refresh_token cookie
+│   │           │   ├── sessions_controller.rb   ← returns refresh token in body on sign-in
 │   │           │   ├── registrations_controller.rb
-│   │           │   └── tokens_controller.rb     ← cookie auth, rotation, new JWT
+│   │           │   └── tokens_controller.rb     ← body auth, rotation, new JWT
 │   │           └── insights/
-│   │               └── salary_controller.rb  ← index + history
+│   │               └── salary_controller.rb  ← index
 │   ├── helpers/
 │   │   └── application_helper.rb        ← country_options, currency_options,
 │   │                                       salary_change_percentage
