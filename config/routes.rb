@@ -27,7 +27,7 @@ Rails.application.routes.draw do
       devise_scope :user do
         post   "users/sign_in",  to: "auth/sessions#create",       as: :api_v1_user_session
         delete "users/sign_out", to: "auth/sessions#destroy",      as: :destroy_api_v1_user_session
-        post   "users",          to: "auth/registrations#create",  as: :api_v1_user_registration
+        post   "users/sign_up",  to: "auth/registrations#create",  as: :api_v1_user_registration
         post   "users/refresh",  to: "auth/tokens#create",         as: :refresh_api_v1_user_token
       end
 

@@ -7,7 +7,9 @@ class Api::V1::Auth::RegistrationsController < Devise::RegistrationsController
 
   def respond_with(resource, _opts = {})
     if resource.persisted?
-      render json: { message: "Signed up successfully." }, status: :created
+      sign_in(resource_name, resource, store: false)
+      raw_token = RefreshToken.generate_for(resource)
+      render json: { message: "Signed up successfully.", auth: { refresh_token: raw_token } }, status: :created
     else
       render json: { errors: resource.errors.as_json }, status: :unprocessable_content
     end
