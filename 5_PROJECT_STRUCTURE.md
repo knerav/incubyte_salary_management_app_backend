@@ -1,6 +1,8 @@
 # Project Structure
 
-I'm building two applications — a Rails monolith and a Next.js frontend — each in its own repository. Separate repositories keep the commit histories focused and make it easier to evaluate each application independently.
+I'm building two applications, a Rails monolith and a Next.js frontend — each in its own repository. Separate repositories keep the commit histories focused and make it easier to evaluate each application independently.
+
+> I would not ordinarily choose such a structure for an actual application. But, for the scope of this assignment I wanted to show you that I'm comfortable working with a traditional rails monolith (using modern Hotwire view standards), and also separate backend and frontend apps.
 
 ---
 
@@ -252,45 +254,10 @@ end
 
 ## Design notes
 
-I put complex business logic — insights aggregations and employee filtering — in `app/services/` rather than in controllers or models. This keeps models focused on state and validations, and makes the business logic independently testable.
+Complex business logic — insights aggregations and employee filtering — goes in `app/services/` rather than in controllers or models. This keeps models focused on state and validations, and makes the business logic independently testable.
 
-I handle JSON rendering with PORO serializer classes in `app/serializers/` rather than inline `render json:` calls in controllers. This makes the response shape explicit and testable without coupling it to the controller.
+JSON rendering is handled with PORO serializer classes in `app/serializers/` rather than inline `render json:` calls in controllers. This makes the response shape explicit and testable without coupling it to the controller.
 
-I test Hotwire endpoints via `test/integration/` rather than `test/controllers/`. Integration tests exercise the full stack through the router, which is closer to how the application is actually consumed. Controller tests miss routing and middleware concerns.
+Hotwire/view endpoints are tested via `test/integration/` rather than `test/controllers/`. Integration tests exercise the full stack through the router, which is closer to how the application is actually consumed. Controller tests miss routing and middleware concerns.
 
-I'm using Rails fixtures (YAML) for test data rather than FactoryBot. Fixtures are the Rails default, fast, and deterministic — no additional dependency needed.
-
----
-
-## Next.js App
-
-```
-incubyte-salary-management-ui/
-├── app/
-│   ├── employees/
-│   │   ├── page.tsx                  ← Employee list
-│   │   ├── new/
-│   │   │   └── page.tsx              ← Add employee
-│   │   └── [id]/
-│   │       ├── page.tsx              ← Employee profile
-│   │       └── edit/
-│   │           └── page.tsx          ← Edit employee
-│   └── insights/
-│       └── page.tsx                  ← Salary insights dashboard
-├── components/
-│   ├── employees/
-│   │   ├── EmployeeTable.tsx
-│   │   ├── EmployeeForm.tsx
-│   │   └── EmployeeCard.tsx
-│   └── insights/
-│       ├── SalaryInsightsPanel.tsx
-│       └── SalaryHistoryChart.tsx
-├── lib/
-│   └── api.ts                        ← Typed API client (fetch wrappers)
-└── types/
-    └── index.ts                      ← Shared TypeScript types
-```
-
-I centralise all API calls in `lib/api.ts` — a single typed client rather than scattered fetch calls across components. Base URL, headers, and error handling are configured in one place.
-
-I define TypeScript types for `Employee`, `SalaryInsights`, and `HistoricalSalaryInsights` once in `types/index.ts` and share them across components and the API client. Any mismatch between the API contract and the frontend surfaces as a type error at compile time.
+I'm using the default Rails fixtures (YAML) for test data.
